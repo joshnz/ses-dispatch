@@ -157,6 +157,12 @@
     border-radius: 0 0 0.375rem 0.375rem;
 }
 
+/* Override Leaflet default divIcon styles (white bg + border) */
+.crew-map-icon {
+    background: none !important;
+    border: none !important;
+}
+
 /* Recommendation cards */
 .rec-card {
     border-left: 4px solid transparent;
