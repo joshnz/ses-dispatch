@@ -1,6 +1,5 @@
-<div class="crew-status-banner mb-3 p-3 rounded
-     {% if crew.status == 'available' %}bg-success{% elif crew.status == 'dispatched' %}bg-primary{% elif crew.status == 'on_scene' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
-    <h4 class="mb-0 text-white">
+<div class="crew-status-banner crew-banner-{{ crew.status }} mb-3 p-3 rounded">
+    <h4 class="mb-0">
         {{ crew.callsign }} &mdash; {{ crew.get_status_display|upper }}
     </h4>
     <small>{{ crew.vehicle_type }}</small>
@@ -8,78 +7,82 @@
 
 {% if crew.current_job %}
 {% with job=crew.current_job %}
-<div class="card mb-3">
-    <div class="card-header">
-        <strong>{{ job.sierra_number }}</strong>
-        <span class="badge bg-priority-{{ job.priority }} float-end">P{{ job.priority }}</span>
+<div class="job-card-shiny mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+            <span class="badge bg-priority-{{ job.priority }}">P{{ job.priority }}</span>
+            <strong>{{ job.sierra_number }}</strong>
+        </div>
     </div>
-    <div class="card-body">
-        <div class="detail-row mb-2">
-            <span class="detail-label text-muted">Address</span>
-            <div class="fw-bold">{{ job.location_address }}</div>
-        </div>
-        <div class="detail-row mb-2">
-            <span class="detail-label text-muted">Description</span>
-            <div>{{ job.description }}</div>
-        </div>
-        <div class="detail-row mb-2">
-            <span class="detail-label text-muted">Caller</span>
-            <div>{{ job.caller_name }} &mdash; {{ job.caller_phone }}</div>
-        </div>
-        <div class="detail-row mb-2">
-            <span class="detail-label text-muted">Age</span>
-            <div>{{ job.age_minutes }} minutes</div>
-        </div>
-        {% if job.other_agencies %}
-        <div class="detail-row mb-2">
-            <span class="detail-label text-muted">Other Agencies</span>
-            <div>{{ job.other_agencies|join:", " }}</div>
-        </div>
-        {% endif %}
 
-        {% with co_crews=job.assigned_crews.all %}
-        {% if co_crews.count > 1 %}
-        <div class="detail-row mb-2">
-            <span class="detail-label text-muted">Co-attending</span>
-            <span style="color: #E65100; font-weight: bold;">
-                {% for c in co_crews %}
-                {% if c.pk != crew.pk %}
-                {{ c.callsign }} ({{ c.vehicle_type }}) - {{ c.status|upper }}
-                {% if not forloop.last %}, {% endif %}
-                {% endif %}
-                {% endfor %}
-            </span>
-        </div>
-        {% endif %}
-        {% endwith %}
+    <div class="detail-row mb-2">
+        <span class="detail-label">Address</span>
+        <div class="fw-bold">{{ job.location_address }}</div>
+    </div>
+    <div class="detail-row mb-2">
+        <span class="detail-label">Description</span>
+        <div>{{ job.description }}</div>
+    </div>
+    <div class="detail-row mb-2">
+        <span class="detail-label">Caller</span>
+        <div>{{ job.caller_name }} &mdash; {{ job.caller_phone }}</div>
+    </div>
+    <div class="detail-row mb-2">
+        <span class="detail-label">Age</span>
+        <div>{{ job.age_minutes }} minutes</div>
+    </div>
+    {% if job.other_agencies %}
+    <div class="detail-row mb-2">
+        <span class="detail-label">Agencies</span>
+        <div>{{ job.other_agencies|join:", " }}</div>
+    </div>
+    {% endif %}
 
-        {% if job.photos.exists %}
-        <div class="photo-strip mt-2">
-            {% for photo in job.photos.all %}
+    {% with co_crews=job.assigned_crews.all %}
+    {% if co_crews.count > 1 %}
+    <div class="detail-row mb-2">
+        <span class="detail-label">Co-attending</span>
+        <span style="color: #E65100; font-weight: bold;">
+            {% for c in co_crews %}
+            {% if c.pk != crew.pk %}
+            {{ c.callsign }} ({{ c.vehicle_type }}) - {{ c.status|upper }}
+            {% if not forloop.last %}, {% endif %}
+            {% endif %}
+            {% endfor %}
+        </span>
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% if job.photos.exists %}
+    <div class="photo-strip mt-2">
+        {% for photo in job.photos.all %}
+        <a href="{{ photo.image.url }}" target="_blank">
             <img src="{{ photo.thumbnail.url }}" alt="Job photo"
                  class="img-thumbnail" style="max-height: 80px;">
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <div class="mt-3 d-grid gap-2">
-            <a href="https://www.google.com/maps/dir/?api=1&destination={{ job.location.y }},{{ job.location.x }}"
-               target="_blank" class="btn btn-primary btn-lg">
-                Navigate to Job
-            </a>
-            {% if crew.status == "dispatched" %}
-            <form hx-post="/action/on-scene/{{ crew.pk }}/" hx-target="#crew-content" hx-swap="innerHTML">
-                {% csrf_token %}
-                <button class="btn btn-warning btn-lg w-100">On Scene</button>
-            </form>
-            {% elif crew.status == "on_scene" %}
-            <form hx-post="/action/complete/{{ job.pk }}/" hx-swap="none">
-                {% csrf_token %}
-                <button class="btn btn-success btn-lg w-100">Job Complete</button>
-            </form>
-            {% endif %}
-        </div>
+        </a>
+        {% endfor %}
     </div>
+    {% endif %}
+</div>
+
+<div class="d-grid gap-2 mb-3">
+    <a href="https://www.google.com/maps/dir/?api=1&destination={{ job.location.y }},{{ job.location.x }}"
+       target="_blank" class="btn btn-primary btn-lg"
+       style="background: #1976d2; border-color: #1976d2;">
+        Navigate to Job
+    </a>
+    {% if crew.status == "dispatched" %}
+    <form hx-post="/action/on-scene/{{ crew.pk }}/" hx-target="#crew-content" hx-swap="innerHTML">
+        {% csrf_token %}
+        <button class="btn btn-warning btn-lg w-100">On Scene</button>
+    </form>
+    {% elif crew.status == "on_scene" %}
+    <form hx-post="/action/complete/{{ job.pk }}/" hx-swap="none">
+        {% csrf_token %}
+        <button class="btn btn-success btn-lg w-100">Job Complete</button>
+    </form>
+    {% endif %}
 </div>
 {% endwith %}
 
@@ -105,7 +108,7 @@
 {% endwith %}
 
 {% else %}
-<div class="text-center text-white mt-5">
+<div class="text-center text-muted mt-5">
     <h4>No active job</h4>
     <p>Waiting for dispatch...</p>
 </div>

@@ -1,0 +1,119 @@
+<div id="crew-detail-inner" data-crew-id="{{ crew.pk }}">
+
+<div class="info-card p-3 mb-3">
+    <h5 class="mb-1">{{ crew.callsign }} <small class="text-muted">{{ crew.vehicle_type }}</small></h5>
+    <div class="mb-2">
+        <span class="status-text-{{ crew.status }}" style="text-transform: uppercase;">
+            {{ crew.get_status_display }}
+        </span>
+    </div>
+    <div class="row small">
+        <div class="col-6 mb-1">
+            <span class="text-muted">Crew Size:</span> {{ crew.crew_size }}
+        </div>
+        <div class="col-6 mb-1">
+            <span class="text-muted">Capabilities:</span>
+            {% for cap in crew.capabilities %}{{ cap }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}
+        </div>
+        {% if time_away %}
+        <div class="col-6 mb-1">
+            <span class="text-muted">Time Away:</span> <strong>{{ time_away }}</strong>
+        </div>
+        {% endif %}
+        {% if crew.location %}
+        <div class="col-6 mb-1">
+            <span class="text-muted">Position:</span>
+            {{ crew.location.y|floatformat:4 }}, {{ crew.location.x|floatformat:4 }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if crew.current_job %}
+<div class="info-card p-3 mb-3">
+    <h6 class="mb-2" style="color: var(--ses-orange);">Current Assignment</h6>
+    <div class="mb-1">
+        <span class="badge bg-priority-{{ crew.current_job.priority }}">P{{ crew.current_job.priority }}</span>
+        <strong>{{ crew.current_job.sierra_number }}</strong>
+    </div>
+    <div class="small mb-1"><span class="text-muted">Address:</span> {{ crew.current_job.location_address }}</div>
+    <div class="small mb-1"><span class="text-muted">Description:</span> {{ crew.current_job.description|truncatechars:100 }}</div>
+    <div class="small mb-2"><span class="text-muted">Age:</span> {{ crew.current_job.age_minutes }} minutes</div>
+
+    {% if photos %}
+    <div class="mb-2">
+        <span class="text-muted small">Photos ({{ photos|length }}):</span>
+        <div class="d-flex gap-1 mt-1 flex-wrap">
+            {% for photo in photos %}
+            <a href="{{ photo.image.url }}" target="_blank">
+                <img src="{{ photo.thumbnail.url }}" alt="Photo"
+                     class="img-thumbnail" style="max-height: 60px; max-width: 80px;">
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="d-grid gap-2">
+        <button class="btn btn-success w-100 crew-action-btn"
+                data-action="/action/complete/{{ crew.current_job.pk }}/">
+            Mark Job Complete
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<div class="d-grid gap-2">
+    {% if crew.status == "dispatched" %}
+    <button class="btn btn-warning w-100 crew-action-btn"
+            data-action="/action/on-scene/{{ crew.pk }}/">
+        On Scene
+    </button>
+    {% endif %}
+
+    {% if crew.deployed_at %}
+    <button class="btn btn-info w-100 crew-action-btn"
+            data-action="/action/return-to-base/{{ crew.pk }}/">
+        Return to Base{% if time_away %} (away {{ time_away }}){% endif %}
+    </button>
+    {% endif %}
+
+    {% if crew.status == "available" %}
+    <button class="btn btn-outline-danger w-100 crew-action-btn"
+            data-action="/action/toggle-crew/{{ crew.pk }}/">
+        Disable Crew
+    </button>
+    {% elif crew.status == "offline" %}
+    <button class="btn btn-success w-100 crew-action-btn"
+            data-action="/action/toggle-crew/{{ crew.pk }}/">
+        Enable Crew
+    </button>
+    {% endif %}
+</div>
+
+</div>
+
+<script>
+(function() {
+    var crewId = '{{ crew.pk }}';
+    document.querySelectorAll('.crew-action-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var action = this.getAttribute('data-action');
+            var csrfToken = '{{ csrf_token }}';
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            fetch(action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: ''
+            }).then(function() {
+                // Reload the detail panel
+                htmx.ajax('GET', '/htmx/crew-detail/' + crewId + '/', '#crew-detail-panel');
+            });
+        });
+    });
+})();
+</script>

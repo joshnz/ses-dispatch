@@ -3,16 +3,175 @@
 {% block title %}Recommendations - SES Dispatch{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header">
-        <h5 class="mb-0">Dispatch Recommendations</h5>
-    </div>
-    <div class="card-body">
-        {% for rec in recommendations %}
-        {% include "dispatch/partials/queue_suggestion_card.html" %}
-        {% empty %}
-        <p class="text-muted">No recommendations available. All jobs assigned or no crews available.</p>
-        {% endfor %}
+{% if is_surge %}
+<div class="surge-banner mb-3">
+    SURGE MODE ACTIVE &mdash; {{ pending_count }} pending jobs
+</div>
+{% endif %}
+
+<div class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Dispatch Board</h5>
+        <a href="{% url 'recommendations' %}" class="btn btn-sm btn-outline-secondary">Refresh</a>
     </div>
 </div>
+
+<div class="row">
+    {% for crew_id, data in crew_data.items %}
+    <div class="col-lg-6 mb-3">
+        <div class="crew-card">
+            <!-- Crew header -->
+            <div class="crew-header crew-header-{{ data.crew.status }} d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>{{ data.crew.callsign }}</strong>
+                    <small class="ms-1">{{ data.crew.vehicle_type }}</small>
+                </div>
+                <div>
+                    {% if data.time_away %}
+                    <span class="badge {% if data.away_mins >= 120 %}bg-danger{% elif data.away_mins >= 60 %}bg-warning text-dark{% else %}bg-light text-dark{% endif %} me-1">
+                        {{ data.time_away }}
+                    </span>
+                    {% endif %}
+                    <span style="text-transform: uppercase; font-size: 0.8rem;">
+                        {{ data.crew.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="crew-body">
+                <!-- Current job (if dispatched/on_scene) -->
+                {% if data.crew.current_job %}
+                <div class="p-2 mb-2 rounded" style="background: #fff3e0;">
+                    <div class="small">
+                        <strong>Current:</strong>
+                        <span class="badge bg-priority-{{ data.crew.current_job.priority }}">P{{ data.crew.current_job.priority }}</span>
+                        {{ data.crew.current_job.sierra_number }} &mdash;
+                        {{ data.crew.current_job.description|truncatechars:50 }}
+                    </div>
+                    <div class="small text-muted">{{ data.crew.current_job.location_address|truncatechars:50 }}</div>
+                    <button class="btn btn-success btn-sm mt-1 rec-action-btn"
+                            data-action="/action/complete/{{ data.crew.current_job.pk }}/">
+                        Complete
+                    </button>
+                </div>
+                {% endif %}
+
+                <!-- Primary recommendation -->
+                {% for rec in data.primary %}
+                <div class="d-flex align-items-center justify-content-between py-1 border-bottom">
+                    <div class="flex-grow-1">
+                        <span class="badge me-1" style="background: #f57c00; color: #fff; min-width: 70px;">Primary</span>
+                        <span class="badge bg-priority-{{ rec.job.priority }}">P{{ rec.job.priority }}</span>
+                        <strong>{{ rec.job.sierra_number }}</strong>
+                        <span class="text-muted small">{{ rec.job.description|truncatechars:40 }}</span>
+                        <div class="small text-muted">
+                            ETA: {{ rec.travel_mins }}m | Score: {{ rec.dispatch_score }}
+                            | {{ rec.job.location_address|truncatechars:35 }}
+                        </div>
+                    </div>
+                    {% if data.crew.status == "available" %}
+                    <form hx-post="/action/dispatch/" hx-swap="none" class="ms-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="job_id" value="{{ rec.job.pk }}">
+                        <input type="hidden" name="crew_id" value="{{ rec.crew.pk }}">
+                        <button class="btn btn-warning btn-sm">Dispatch</button>
+                    </form>
+                    {% else %}
+                    <span class="badge bg-secondary ms-2">Next up</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <!-- Alternate recommendation -->
+                {% for rec in data.alternate %}
+                <div class="d-flex align-items-center justify-content-between py-1 border-bottom">
+                    <div class="flex-grow-1">
+                        <span class="badge me-1" style="background: #e0e0e0; color: #666; min-width: 70px;">Alternate</span>
+                        <span class="badge bg-priority-{{ rec.job.priority }}">P{{ rec.job.priority }}</span>
+                        <strong>{{ rec.job.sierra_number }}</strong>
+                        <span class="text-muted small">{{ rec.job.description|truncatechars:40 }}</span>
+                        <div class="small text-muted">
+                            ETA: {{ rec.travel_mins }}m | Score: {{ rec.dispatch_score }}
+                            | {{ rec.job.location_address|truncatechars:35 }}
+                        </div>
+                    </div>
+                    {% if data.crew.status == "available" %}
+                    <form hx-post="/action/dispatch/" hx-swap="none" class="ms-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="job_id" value="{{ rec.job.pk }}">
+                        <input type="hidden" name="crew_id" value="{{ rec.crew.pk }}">
+                        <button class="btn btn-outline-secondary btn-sm">Dispatch</button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <!-- Queue suggestions -->
+                {% for rec in data.queue %}
+                <div class="d-flex align-items-center justify-content-between py-1 border-bottom">
+                    <div class="flex-grow-1">
+                        <span class="badge me-1" style="background: var(--p3-color); color: #fff; min-width: 70px;">Queue</span>
+                        <span class="badge bg-priority-{{ rec.job.priority }}">P{{ rec.job.priority }}</span>
+                        <strong>{{ rec.job.sierra_number }}</strong>
+                        <span class="text-muted small">{{ rec.job.description|truncatechars:40 }}</span>
+                        <div class="small text-muted">
+                            ETA: {{ rec.travel_mins }}m | Score: {{ rec.dispatch_score }}
+                            | Pos: {{ rec.queue_position }}
+                        </div>
+                    </div>
+                    <form hx-post="/action/queue/{{ rec.crew.pk }}/add/" hx-swap="none" class="ms-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="job_id" value="{{ rec.job.pk }}">
+                        <button class="btn btn-warning btn-sm">Queue</button>
+                    </form>
+                </div>
+                {% endfor %}
+
+                {% if not data.primary and not data.alternate and not data.queue and not data.crew.current_job %}
+                <div class="text-muted small py-2">No recommendations</div>
+                {% endif %}
+
+                <!-- Return to base button -->
+                {% if data.crew.deployed_at %}
+                <div class="mt-2">
+                    <button class="btn btn-info btn-sm w-100 rec-action-btn"
+                            data-action="/action/return-to-base/{{ data.crew.pk }}/">
+                        Return to Base{% if data.time_away %} ({{ data.time_away }}){% endif %}
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p class="text-muted">No active crews. All crews are offline.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="modal-container"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    document.querySelectorAll('.rec-action-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var action = this.getAttribute('data-action');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            fetch(action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: ''
+            }).then(function() {
+                window.location.reload();
+            });
+        });
+    });
+})();
+</script>
 {% endblock %}

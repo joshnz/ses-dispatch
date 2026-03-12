@@ -3,63 +3,131 @@
 {% block title %}Job Queue - SES Dispatch{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header">
-        <h5 class="mb-0">All Jobs</h5>
+<div class="row">
+    <!-- Sidebar filters -->
+    <div class="col-lg-2">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">Filters</h6>
+            </div>
+            <div class="card-body">
+                <form method="get">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Priority</label>
+                        <select name="priority" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">All</option>
+                            <option value="1" {% if priority_filter == "1" %}selected{% endif %}>P1 - Emergency</option>
+                            <option value="2" {% if priority_filter == "2" %}selected{% endif %}>P2 - Urgent</option>
+                            <option value="3" {% if priority_filter == "3" %}selected{% endif %}>P3 - Routine</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Status</label>
+                        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">All</option>
+                            <option value="pending" {% if status_filter == "pending" %}selected{% endif %}>Pending</option>
+                            <option value="assigned" {% if status_filter == "assigned" %}selected{% endif %}>Assigned</option>
+                            <option value="en_route" {% if status_filter == "en_route" %}selected{% endif %}>En Route</option>
+                            <option value="on_scene" {% if status_filter == "on_scene" %}selected{% endif %}>On Scene</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover table-sm mb-0">
-                <thead>
-                    <tr>
-                        <th>Sierra #</th>
-                        <th>Priority</th>
-                        <th>Address</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th>Crew(s)</th>
-                        <th>Age</th>
-                        <th>Photos</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for job in jobs %}
-                    <tr>
-                        <td>
-                            <a href="#" hx-get="/htmx/job-detail/{{ job.pk }}/"
-                               hx-target="#modal-container" hx-swap="innerHTML">
-                                {{ job.sierra_number }}
-                            </a>
-                        </td>
-                        <td><span class="badge bg-priority-{{ job.priority }}">P{{ job.priority }}</span></td>
-                        <td>{{ job.location_address|truncatechars:40 }}</td>
-                        <td>{{ job.description|truncatechars:50 }}</td>
-                        <td><span class="badge bg-{{ job.status_color }}">{{ job.get_status_display }}</span></td>
-                        <td>
-                            {% for crew in job.assigned_crews.all %}
-                            {{ crew.callsign }}{% if not forloop.last %}, {% endif %}
+
+    <!-- Job table -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Job Queue</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0" id="job-table">
+                        <thead>
+                            <tr>
+                                <th>Sierra #</th>
+                                <th>Priority</th>
+                                <th>Address</th>
+                                <th>Age</th>
+                                <th>Status</th>
+                                <th>Recommended</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in jobs %}
+                            <tr class="job-row" style="cursor: pointer;"
+                                hx-get="/htmx/job-queue-detail/{{ job.pk }}/"
+                                hx-target="#job-detail-panel"
+                                hx-swap="innerHTML">
+                                <td><strong>{{ job.sierra_number }}</strong></td>
+                                <td><span class="badge bg-priority-{{ job.priority }}">P{{ job.priority }}</span></td>
+                                <td>{{ job.location_address|truncatechars:35 }}</td>
+                                <td>{{ job.age_minutes }}m</td>
+                                <td>
+                                    <span class="status-text-{{ job.status }}" style="text-transform: uppercase;">
+                                        {{ job.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if job.rec_crew %}
+                                    <small>{{ job.rec_crew }} ({{ job.rec_eta }}m)</small>
+                                    {% elif job.status == "assigned" %}
+                                    <small class="text-muted">Assigned</small>
+                                    {% else %}
+                                    <small class="text-muted">-</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if job.rec_score %}
+                                    <small>{{ job.rec_score }}</small>
+                                    {% else %}
+                                    <small class="text-muted">-</small>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="7" class="text-center text-muted">No jobs matching filters</td></tr>
                             {% endfor %}
-                        </td>
-                        <td>{{ job.age_minutes }}m</td>
-                        <td>{{ job.photos.count }}</td>
-                        <td>
-                            {% if job.status == "pending" or job.status == "assigned" %}
-                            <form hx-post="/action/complete/{{ job.pk }}/" hx-swap="none">
-                                {% csrf_token %}
-                                <button class="btn btn-sm btn-outline-success">Complete</button>
-                            </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="9" class="text-center text-muted">No jobs</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job detail panel -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Job Details</h5>
+            </div>
+            <div class="card-body" id="job-detail-panel">
+                <div class="text-center text-muted py-4">
+                    <p>Click a job row to view details</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <div id="modal-container"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('htmx:afterRequest', function(e) {
+        if (e.detail.target && e.detail.target.id === 'job-detail-panel') {
+            document.querySelectorAll('#job-table .job-row').forEach(function(row) {
+                row.classList.remove('table-active');
+            });
+            var trigger = e.detail.elt;
+            if (trigger && trigger.classList.contains('job-row')) {
+                trigger.classList.add('table-active');
+            }
+        }
+    });
+</script>
 {% endblock %}

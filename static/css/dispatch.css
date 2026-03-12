@@ -1,40 +1,148 @@
 /* SES Dispatch - ICP Dashboard Styles */
+/* Styling matched to VicSES ICP Tool (R Shiny reference) */
 
 :root {
     --ses-orange: #E65100;
-    --ses-orange-light: #FF6D00;
+    --ses-orange-light: #FF9800;
+    --ses-orange-bg: #fff3e0;
     --ses-dark: #1B1B1B;
+    --p1-color: #d32f2f;
+    --p1-bg: #ffebee;
+    --p2-color: #f57c00;
+    --p2-bg: #fff3e0;
+    --p3-color: #1976d2;
+    --p3-bg: #e3f2fd;
+    --status-available: #2e7d32;
+    --status-available-bg: #e8f5e9;
+    --status-dispatched: #f57c00;
+    --status-dispatched-bg: #fff3e0;
+    --status-on-scene: #d32f2f;
+    --status-on-scene-bg: #ffebee;
+    --status-offline: #9e9e9e;
+    --status-pending: #1976d2;
+    --status-pending-bg: #e3f2fd;
 }
 
 /* Priority badges */
-.bg-priority-1 { background-color: #dc3545 !important; }
-.bg-priority-2 { background-color: #fd7e14 !important; }
-.bg-priority-3 { background-color: #198754 !important; }
+.bg-priority-1 { background-color: var(--p1-color) !important; }
+.bg-priority-2 { background-color: var(--p2-color) !important; }
+.bg-priority-3 { background-color: var(--p3-color) !important; }
+
+/* Status badges - custom colors matching Shiny */
+.badge-status-available { background-color: var(--status-available) !important; color: #fff; }
+.badge-status-dispatched { background-color: var(--status-dispatched) !important; color: #fff; }
+.badge-status-on_scene { background-color: var(--status-on-scene) !important; color: #fff; }
+.badge-status-returning { background-color: var(--status-dispatched) !important; color: #fff; }
+.badge-status-offline { background-color: var(--status-offline) !important; color: #fff; }
+.badge-status-pending { background-color: var(--status-pending) !important; color: #fff; }
+.badge-status-assigned { background-color: var(--status-dispatched) !important; color: #fff; }
+.badge-status-en_route { background-color: var(--status-dispatched) !important; color: #fff; }
+.badge-status-completed { background-color: var(--status-offline) !important; color: #fff; }
+.badge-status-cancelled { background-color: #616161 !important; color: #fff; }
+
+/* Status text (colored text, no background - for crew table) */
+.status-text-available { color: var(--status-available); font-weight: bold; }
+.status-text-dispatched { color: var(--status-dispatched); font-weight: bold; }
+.status-text-on_scene { color: var(--status-on-scene); font-weight: bold; }
+.status-text-returning { color: var(--status-dispatched); font-weight: bold; }
+.status-text-offline { color: var(--status-offline); }
+.status-text-pending { color: var(--status-pending); font-weight: bold; }
+.status-text-assigned { color: var(--status-dispatched); font-weight: bold; }
+
+/* Metric boxes with colored backgrounds */
+.metric-card {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: transform 0.15s ease;
+}
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+.metric-card .card-body { padding: 1rem; }
+.metric-card h3 { font-size: 2rem; font-weight: 700; margin-bottom: 0; }
+.metric-card small { font-weight: 500; opacity: 0.85; }
+
+.metric-pending { background-color: var(--p2-bg); color: var(--p2-color); }
+.metric-pending h3 { color: var(--p2-color); }
+
+.metric-active { background-color: var(--p1-bg); color: var(--p1-color); }
+.metric-active h3 { color: var(--p1-color); }
+
+.metric-available { background-color: var(--status-available-bg); color: var(--status-available); }
+.metric-available h3 { color: var(--status-available); }
+
+.metric-dispatched { background-color: var(--p3-bg); color: var(--p3-color); }
+.metric-dispatched h3 { color: var(--p3-color); }
+
+/* Info cards - orange left border style (Shiny reference) */
+.info-card {
+    border-left: 4px solid var(--ses-orange) !important;
+    background: var(--ses-orange-bg);
+    border-radius: 4px;
+}
+
+/* Surge banner */
+.surge-banner {
+    background-color: var(--p1-color);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Score bar */
+.score-bar-container {
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    height: 8px;
+    overflow: hidden;
+    flex: 1;
+    margin: 0 8px;
+}
+.score-bar {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #e65100, #ff9800);
+    transition: width 0.3s ease;
+}
 
 /* Crew cards */
 .crew-card {
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
     transition: all 0.2s ease;
+    margin-bottom: 10px;
 }
-
 .crew-card:hover {
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-
 .crew-card .crew-header {
-    border-bottom: 1px solid #eee;
-    padding-bottom: 4px;
-    margin-bottom: 4px;
+    padding: 8px 12px;
+    border-bottom: none;
+    color: white;
+    font-weight: 600;
 }
+.crew-card .crew-body {
+    padding: 8px 12px;
+}
+/* Crew header colors by status */
+.crew-header-available { background-color: var(--status-available); }
+.crew-header-dispatched { background-color: var(--status-dispatched); }
+.crew-header-on_scene { background-color: var(--status-on-scene); }
+.crew-header-returning { background-color: var(--status-dispatched); }
+.crew-header-offline { background-color: var(--status-offline); }
 
 /* Queue list */
 .queue-list {
     font-size: 0.85rem;
 }
-
 .queue-list .list-group-item {
     cursor: grab;
 }
-
 .queue-list .list-group-item:active {
     cursor: grabbing;
 }
@@ -50,28 +158,29 @@
 }
 
 /* Recommendation cards */
-.card.border-success { border-left: 4px solid #198754 !important; }
-.card.border-info { border-left: 4px solid #0dcaf0 !important; }
-.card.border-warning { border-left: 4px solid #ffc107 !important; }
+.rec-card {
+    border-left: 4px solid transparent;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    padding: 10px 14px;
+    transition: background-color 0.15s ease;
+}
+.rec-card:hover { background-color: #fafafa; }
+.rec-card-primary { border-left-color: var(--status-available); background: var(--status-available-bg); }
+.rec-card-alternate { border-left-color: var(--p3-color); background: var(--p3-bg); }
+.rec-card-queue { border-left-color: var(--p2-color); background: var(--p2-bg); }
 
 /* Modal backdrop */
 .modal-backdrop {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0; width: 100%; height: 100%;
     background-color: rgba(0,0,0,0.5);
     z-index: 1040;
 }
-
 .modal {
     z-index: 1050;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0; width: 100%; height: 100%;
 }
 
 /* Navbar */
@@ -79,8 +188,47 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Metrics cards */
-.card.border-warning { border-left: 3px solid #ffc107 !important; }
-.card.border-info { border-left: 3px solid #0dcaf0 !important; }
-.card.border-success { border-left: 3px solid #198754 !important; }
-.card.border-primary { border-left: 3px solid #0d6efd !important; }
+/* Card headers with SES orange accent */
+.card > .card-header {
+    background-color: #fff;
+    border-bottom: 2px solid var(--ses-orange);
+}
+.card > .card-header h5,
+.card > .card-header h6 {
+    color: var(--ses-orange);
+}
+
+/* General card styling */
+.card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* Table row selection */
+.table-active {
+    background-color: var(--ses-orange-bg) !important;
+}
+#job-table tr:hover, #crew-table tr:hover {
+    background-color: #fff8e1;
+}
+
+/* Crew screen job card (Shiny style) */
+.job-card-shiny {
+    border-left: 5px solid var(--ses-orange);
+    background: var(--ses-orange-bg);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+/* Photo strip */
+.photo-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 8px 0;
+}
+.photo-strip img {
+    border-radius: 4px;
+}

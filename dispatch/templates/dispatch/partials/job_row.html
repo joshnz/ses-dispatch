@@ -7,13 +7,13 @@
     </td>
     <td><span class="badge bg-priority-{{ job.priority }}">P{{ job.priority }}</span></td>
     <td>{{ job.location_address|truncatechars:40 }}</td>
-    <td><span class="badge bg-{{ job.status_color }}">{{ job.get_status_display }}</span></td>
+    <td><span class="badge badge-status-{{ job.status }}">{{ job.get_status_display }}</span></td>
     <td>
         {% for crew in job.assigned_crews.all %}
         {{ crew.callsign }}{% if not forloop.last %}, {% endif %}
         {% endfor %}
         {% if job.assigned_crews.count > 1 %}
-        <span class="badge bg-info">+{{ job.assigned_crews.count|add:"-1" }}</span>
+        <span class="badge badge-status-dispatched">+{{ job.assigned_crews.count|add:"-1" }}</span>
         {% endif %}
     </td>
     <td>{{ job.age_minutes }}m</td>

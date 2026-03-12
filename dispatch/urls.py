@@ -15,6 +15,8 @@ urlpatterns = [
     path("htmx/crew-screen-content/<int:pk>/", crew_screen.htmx_crew_screen_content),
     path("htmx/map-data/", dashboard.htmx_map_data),
     path("htmx/job-detail/<int:pk>/", dashboard.htmx_job_detail_modal),
+    path("htmx/job-queue-detail/<int:pk>/", dashboard.htmx_job_queue_detail),
+    path("htmx/crew-detail/<int:pk>/", dashboard.htmx_crew_detail),
     path("htmx/crew-queue/<int:crew_id>/", dispatch_actions.htmx_crew_queue),
 
     # Actions (POST)

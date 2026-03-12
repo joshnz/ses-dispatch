@@ -3,18 +3,88 @@
 {% block title %}Crew Status - SES Dispatch{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header">
-        <h5 class="mb-0">All Crews</h5>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            {% for crew in crews %}
-            <div class="col-md-6 col-lg-4 mb-3">
-                {% include "dispatch/partials/crew_card.html" %}
+<div class="row">
+    <!-- Crew table (8 cols) -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Crew Status</h5>
             </div>
-            {% endfor %}
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0" id="crew-table">
+                        <thead>
+                            <tr>
+                                <th>Callsign</th>
+                                <th>Vehicle</th>
+                                <th>Status</th>
+                                <th>Crew Size</th>
+                                <th>Current Job</th>
+                                <th>Capabilities</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for crew in crews %}
+                            <tr class="crew-row" style="cursor: pointer;"
+                                hx-get="/htmx/crew-detail/{{ crew.pk }}/"
+                                hx-target="#crew-detail-panel"
+                                hx-swap="innerHTML">
+                                <td><strong>{{ crew.callsign }}</strong></td>
+                                <td>{{ crew.vehicle_type }}</td>
+                                <td>
+                                    <span class="status-text-{{ crew.status }}" style="text-transform: uppercase;">
+                                        {{ crew.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ crew.crew_size }}</td>
+                                <td>
+                                    {% if crew.current_job %}
+                                    {{ crew.current_job.sierra_number }}
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{% for cap in crew.capabilities %}{{ cap }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crew detail panel (4 cols) -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Crew Details</h5>
+            </div>
+            <div class="card-body" id="crew-detail-panel">
+                <div class="text-center text-muted py-4">
+                    <p>Click a crew row to view details</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Highlight selected row
+    document.addEventListener('htmx:afterRequest', function(e) {
+        if (e.detail.target && e.detail.target.id === 'crew-detail-panel') {
+            document.querySelectorAll('#crew-table .crew-row').forEach(function(row) {
+                row.classList.remove('table-active');
+            });
+            var trigger = e.detail.elt;
+            if (trigger && trigger.classList.contains('crew-row')) {
+                trigger.classList.add('table-active');
+            }
+        }
+    });
+</script>
 {% endblock %}

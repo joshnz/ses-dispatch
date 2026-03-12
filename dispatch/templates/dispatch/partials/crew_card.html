@@ -1,66 +1,68 @@
-<div class="crew-card border rounded p-2 mb-2" id="crew-{{ crew.pk }}">
-    <div class="crew-header d-flex justify-content-between align-items-center">
+<div class="crew-card" id="crew-{{ crew.pk }}">
+    <div class="crew-header crew-header-{{ crew.status }} d-flex justify-content-between align-items-center">
         <strong>{{ crew.callsign }}</strong>
-        <span class="badge bg-{{ crew.status_color }}">{{ crew.get_status_display }}</span>
+        <span>{{ crew.get_status_display }}</span>
     </div>
-    <small class="text-muted">{{ crew.vehicle_type }}</small>
+    <div class="crew-body">
+        <small class="text-muted">{{ crew.vehicle_type }}</small>
 
-    {% if crew.current_job %}
-    <div class="active-job mt-1">
-        <small class="text-muted">Active:</small>
-        <a href="#" hx-get="/htmx/job-detail/{{ crew.current_job.pk }}/"
-           hx-target="#modal-container" hx-swap="innerHTML">
-            {{ crew.current_job.sierra_number }}
-        </a>
-        &mdash; {{ crew.current_job.location_address|truncatechars:40 }}
-    </div>
-    {% endif %}
-
-    {% with queue=crew.job_queue.all %}
-    {% if queue.count > 1 %}
-    <div class="job-queue mt-2">
-        <small class="text-muted">Queue ({{ queue.count|add:"-1" }} upcoming):</small>
-        <ol class="queue-list list-group list-group-flush list-group-numbered">
-            {% for entry in queue %}
-            {% if entry.position > 0 %}
-            <li class="list-group-item py-1 px-2 d-flex justify-content-between align-items-center"
-                data-job-id="{{ entry.job.pk }}" data-position="{{ entry.position }}">
-                <span>
-                    <span class="badge bg-priority-{{ entry.job.priority }}">P{{ entry.job.priority }}</span>
-                    {{ entry.job.sierra_number }}
-                </span>
-                <button class="btn btn-sm btn-outline-danger"
-                        hx-delete="/action/queue/{{ crew.pk }}/{{ entry.job.pk }}/"
-                        hx-target="#crew-{{ crew.pk }}"
-                        hx-swap="outerHTML">
-                    &times;
-                </button>
-            </li>
-            {% endif %}
-            {% endfor %}
-        </ol>
-    </div>
-    {% endif %}
-    {% endwith %}
-
-    <div class="crew-actions mt-2">
-        {% if crew.status == "dispatched" %}
-        <form hx-post="/action/on-scene/{{ crew.pk }}/" hx-target="#crew-{{ crew.pk }}" hx-swap="outerHTML" class="d-inline">
-            {% csrf_token %}
-            <button class="btn btn-sm btn-warning">On Scene</button>
-        </form>
-        {% elif crew.status == "on_scene" %}
-        <form hx-post="/action/return-to-base/{{ crew.pk }}/" hx-target="#crew-{{ crew.pk }}" hx-swap="outerHTML" class="d-inline">
-            {% csrf_token %}
-            <button class="btn btn-sm btn-info">Return to Base</button>
-        </form>
-        {% elif crew.status == "available" or crew.status == "offline" %}
-        <form hx-post="/action/toggle-crew/{{ crew.pk }}/" hx-target="#crew-{{ crew.pk }}" hx-swap="outerHTML" class="d-inline">
-            {% csrf_token %}
-            <button class="btn btn-sm btn-outline-secondary">
-                {% if crew.status == "available" %}Go Offline{% else %}Go Online{% endif %}
-            </button>
-        </form>
+        {% if crew.current_job %}
+        <div class="active-job mt-1">
+            <small class="text-muted">Active:</small>
+            <a href="#" hx-get="/htmx/job-detail/{{ crew.current_job.pk }}/"
+               hx-target="#modal-container" hx-swap="innerHTML">
+                {{ crew.current_job.sierra_number }}
+            </a>
+            &mdash; {{ crew.current_job.location_address|truncatechars:40 }}
+        </div>
         {% endif %}
+
+        {% with queue=crew.job_queue.all %}
+        {% if queue.count > 1 %}
+        <div class="job-queue mt-2">
+            <small class="text-muted">Queue ({{ queue.count|add:"-1" }} upcoming):</small>
+            <ol class="queue-list list-group list-group-flush list-group-numbered">
+                {% for entry in queue %}
+                {% if entry.position > 0 %}
+                <li class="list-group-item py-1 px-2 d-flex justify-content-between align-items-center"
+                    data-job-id="{{ entry.job.pk }}" data-position="{{ entry.position }}">
+                    <span>
+                        <span class="badge bg-priority-{{ entry.job.priority }}">P{{ entry.job.priority }}</span>
+                        {{ entry.job.sierra_number }}
+                    </span>
+                    <button class="btn btn-sm btn-outline-danger"
+                            hx-delete="/action/queue/{{ crew.pk }}/{{ entry.job.pk }}/"
+                            hx-target="#crew-{{ crew.pk }}"
+                            hx-swap="outerHTML">
+                        &times;
+                    </button>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ol>
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="crew-actions mt-2">
+            {% if crew.status == "dispatched" %}
+            <form hx-post="/action/on-scene/{{ crew.pk }}/" hx-target="#crew-{{ crew.pk }}" hx-swap="outerHTML" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-warning">On Scene</button>
+            </form>
+            {% elif crew.status == "on_scene" %}
+            <form hx-post="/action/return-to-base/{{ crew.pk }}/" hx-target="#crew-{{ crew.pk }}" hx-swap="outerHTML" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-info">Return to Base</button>
+            </form>
+            {% elif crew.status == "available" or crew.status == "offline" %}
+            <form hx-post="/action/toggle-crew/{{ crew.pk }}/" hx-target="#crew-{{ crew.pk }}" hx-swap="outerHTML" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-secondary">
+                    {% if crew.status == "available" %}Go Offline{% else %}Go Online{% endif %}
+                </button>
+            </form>
+            {% endif %}
+        </div>
     </div>
 </div>

@@ -30,10 +30,10 @@
     let crewMarkers = L.layerGroup().addTo(map);
     let dispatchLines = L.layerGroup().addTo(map);
 
-    const priorityColors = { 1: '#dc3545', 2: '#fd7e14', 3: '#198754' };
+    const priorityColors = { 1: '#d32f2f', 2: '#f57c00', 3: '#1976d2' };
     const statusColors = {
-        available: '#198754', dispatched: '#0d6efd',
-        on_scene: '#ffc107', returning: '#0dcaf0', offline: '#6c757d'
+        available: '#2e7d32', dispatched: '#f57c00',
+        on_scene: '#d32f2f', returning: '#f57c00', offline: '#9e9e9e'
     };
 
     function updateMarkers(data) {
@@ -58,7 +58,7 @@
             job.assigned_crews.forEach(function(crew) {
                 L.polyline(
                     [[crew.lat, crew.lng], [job.lat, job.lng]],
-                    { color: color, weight: 2, dashArray: '5,5', opacity: 0.7 }
+                    { color: '#f57c00', weight: 2, dashArray: '5,5', opacity: 0.7 }
                 ).addTo(dispatchLines)
                     .bindTooltip(crew.callsign);
             });
