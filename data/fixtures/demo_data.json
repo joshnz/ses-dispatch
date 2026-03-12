@@ -11,7 +11,10 @@
             "description": "Large tree fallen across driveway, blocking access. Caller elderly, unable to leave property.",
             "priority": 3,
             "other_agencies": [],
-            "status": "pending"
+            "status": "pending",
+            "created_at": "2026-03-12T08:15:00+11:00",
+            "updated_at": "2026-03-12T08:15:00+11:00",
+            "upload_token": "a1b2c3d4-e5f6-7890-abcd-ef1234567801"
         }
     },
     {
@@ -26,7 +29,10 @@
             "description": "Roof tiles displaced by wind, water entering bedroom. Tarp needed urgently.",
             "priority": 3,
             "other_agencies": [],
-            "status": "pending"
+            "status": "pending",
+            "created_at": "2026-03-12T08:22:00+11:00",
+            "updated_at": "2026-03-12T08:22:00+11:00",
+            "upload_token": "a1b2c3d4-e5f6-7890-abcd-ef1234567802"
         }
     },
     {
@@ -41,7 +47,10 @@
             "description": "Flooding in garage from blocked stormwater drain. Water rising slowly.",
             "priority": 3,
             "other_agencies": [],
-            "status": "pending"
+            "status": "pending",
+            "created_at": "2026-03-12T08:30:00+11:00",
+            "updated_at": "2026-03-12T08:30:00+11:00",
+            "upload_token": "a1b2c3d4-e5f6-7890-abcd-ef1234567803"
         }
     },
     {
@@ -56,7 +65,10 @@
             "description": "Tree branch on power lines in street. Western Power notified.",
             "priority": 1,
             "other_agencies": ["AusNet Services"],
-            "status": "pending"
+            "status": "pending",
+            "created_at": "2026-03-12T08:35:00+11:00",
+            "updated_at": "2026-03-12T08:35:00+11:00",
+            "upload_token": "a1b2c3d4-e5f6-7890-abcd-ef1234567804"
         }
     },
     {
@@ -71,7 +83,10 @@
             "description": "Fence panels blown onto road causing traffic hazard.",
             "priority": 3,
             "other_agencies": ["VicPol"],
-            "status": "pending"
+            "status": "pending",
+            "created_at": "2026-03-12T08:42:00+11:00",
+            "updated_at": "2026-03-12T08:42:00+11:00",
+            "upload_token": "a1b2c3d4-e5f6-7890-abcd-ef1234567805"
         }
     },
     {
@@ -86,7 +101,10 @@
             "description": "Flooding in backyard, water approaching rear of house. Sandbags requested.",
             "priority": 3,
             "other_agencies": [],
-            "status": "pending"
+            "status": "pending",
+            "created_at": "2026-03-12T08:50:00+11:00",
+            "updated_at": "2026-03-12T08:50:00+11:00",
+            "upload_token": "a1b2c3d4-e5f6-7890-abcd-ef1234567806"
         }
     },
     {
@@ -101,7 +119,10 @@
             "description": "Broken window from flying debris, wind and rain entering commercial property.",
             "priority": 3,
             "other_agencies": [],
-            "status": "pending"
+            "status": "pending",
+            "created_at": "2026-03-12T09:00:00+11:00",
+            "updated_at": "2026-03-12T09:00:00+11:00",
+            "upload_token": "a1b2c3d4-e5f6-7890-abcd-ef1234567807"
         }
     },
     {
@@ -116,7 +137,10 @@
             "description": "Tree leaning dangerously over house, has not yet fallen.",
             "priority": 1,
             "other_agencies": ["CFA"],
-            "status": "pending"
+            "status": "pending",
+            "created_at": "2026-03-12T09:10:00+11:00",
+            "updated_at": "2026-03-12T09:10:00+11:00",
+            "upload_token": "a1b2c3d4-e5f6-7890-abcd-ef1234567808"
         }
     },
     {
@@ -131,8 +155,9 @@
             "current_job": null,
             "deployed_at": null,
             "location": "POINT(144.8875 -37.7987)",
-            "speed_kmh": 0,
-            "heading": 0
+            "speed_kmh": "0.0",
+            "heading": 0,
+            "position_updated_at": "2026-03-12T08:00:00+11:00"
         }
     },
     {
@@ -147,8 +172,9 @@
             "current_job": null,
             "deployed_at": null,
             "location": "POINT(144.8780 -37.7920)",
-            "speed_kmh": 0,
-            "heading": 0
+            "speed_kmh": "0.0",
+            "heading": 0,
+            "position_updated_at": "2026-03-12T08:00:00+11:00"
         }
     },
     {
@@ -163,8 +189,9 @@
             "current_job": null,
             "deployed_at": null,
             "location": "POINT(144.8930 -37.8105)",
-            "speed_kmh": 0,
-            "heading": 0
+            "speed_kmh": "0.0",
+            "heading": 0,
+            "position_updated_at": "2026-03-12T08:00:00+11:00"
         }
     },
     {
@@ -179,8 +206,9 @@
             "current_job": null,
             "deployed_at": null,
             "location": "POINT(144.8885 -37.7993)",
-            "speed_kmh": 0,
-            "heading": 0
+            "speed_kmh": "0.0",
+            "heading": 0,
+            "position_updated_at": "2026-03-12T08:00:00+11:00"
         }
     }
 ]
