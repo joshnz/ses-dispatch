@@ -5,15 +5,15 @@ After=network.target
 [Service]
 User=ubuntu
 Group=www-data
-WorkingDirectory=/opt/ses-dispatch/ses_dispatch
-EnvironmentFile=/opt/ses-dispatch/ses_dispatch/.env
-ExecStart=/opt/ses-dispatch/ses_dispatch/.venv/bin/gunicorn \
+WorkingDirectory=/opt/ses-dispatch
+EnvironmentFile=/opt/ses-dispatch/.env
+ExecStart=/opt/ses-dispatch/.venv/bin/gunicorn \
     config.wsgi:application \
     --bind 127.0.0.1:8000 \
     --workers 2 \
     --timeout 120 \
-    --access-logfile /opt/ses-dispatch/ses_dispatch/logs/access.log \
-    --error-logfile /opt/ses-dispatch/ses_dispatch/logs/error.log
+    --access-logfile /opt/ses-dispatch/logs/access.log \
+    --error-logfile /opt/ses-dispatch/logs/error.log
 Restart=on-failure
 RestartSec=5
 

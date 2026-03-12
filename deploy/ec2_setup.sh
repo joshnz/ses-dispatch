@@ -28,7 +28,7 @@
 set -euo pipefail
 
 # --- Configuration -----------------------------------------------------------
-APP_DIR="/opt/ses-dispatch/ses_dispatch"
+APP_DIR="/opt/ses-dispatch"
 REPO_DIR="/opt/ses-dispatch"
 DOMAIN="${DOMAIN:-}"              # Set to your domain for HTTPS, or leave empty
 DEMO_USER="${DEMO_USER:-admin}"
