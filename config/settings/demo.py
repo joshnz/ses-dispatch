@@ -33,6 +33,9 @@ DATABASES = {
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 
+# Request profiling (logs request duration + query counts)
+MIDDLEWARE.append("dispatch.middleware.RequestProfilingMiddleware")
+
 # Photo storage: local filesystem
 DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -57,15 +60,51 @@ CSRF_TRUSTED_ORIGINS = [
     f"https://{h}" for h in ALLOWED_HOSTS if h != "*"
 ]
 
-# Logging
+# Logging — profile log tracks request timing, django log tracks errors
 LOGGING = {
     "version": 1,
-    "handlers": {
-        "console": {"class": "logging.StreamHandler"},
-        "file": {
-            "class": "logging.FileHandler",
-            "filename": BASE_DIR / "logs" / "django.log",
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[{asctime}] {levelname} {name}: {message}",
+            "style": "{",
         },
     },
-    "root": {"handlers": ["console", "file"], "level": "INFO"},
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        "django_file": {
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs" / "django.log",
+            "formatter": "verbose",
+        },
+        "profiler_file": {
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs" / "profiler.log",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "django_file"],
+            "level": "WARNING",
+        },
+        "django.request": {
+            "handlers": ["console", "django_file"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "dispatch": {
+            "handlers": ["console", "django_file"],
+            "level": "INFO",
+        },
+        "dispatch.profiler": {
+            "handlers": ["profiler_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+    "root": {"handlers": ["console", "django_file"], "level": "WARNING"},
 }
