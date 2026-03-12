@@ -1,7 +1,7 @@
 """
 Demo deployment settings.
-Uses SQLite + SpatiaLite (no PostGIS needed), local file storage for photos.
-Designed for a single EC2 instance or similar low-cost hosting.
+Uses PostGIS via Docker container, local file storage for photos.
+Designed for a single EC2/Lightsail instance.
 """
 import os
 from .base import *
@@ -10,14 +10,24 @@ DEBUG = False
 SECRET_KEY = os.environ.get("SECRET_KEY", "change-me-before-deploying")
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
 
-# Database: SQLite + SpatiaLite (no external DB service needed)
+# Database: PostGIS via Docker container
+DATABASE_URL = os.environ.get(
+    "DATABASE_URL", "postgis://dispatch:dispatch@localhost:5432/dispatch"
+)
+
+# Parse DATABASE_URL manually to avoid requiring django-environ in demo
+import re
+_m = re.match(r"postgis://(\w+):(\w+)@([\w.]+):(\d+)/(\w+)", DATABASE_URL)
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.spatialite",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": _m.group(5) if _m else "dispatch",
+        "USER": _m.group(1) if _m else "dispatch",
+        "PASSWORD": _m.group(2) if _m else "dispatch",
+        "HOST": _m.group(3) if _m else "localhost",
+        "PORT": _m.group(4) if _m else "5432",
     }
 }
-SPATIALITE_LIBRARY_PATH = "mod_spatialite"
 
 # Static files (served by whitenoise)
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
