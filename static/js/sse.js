@@ -1,13 +1,29 @@
-/* SSE (Server-Sent Events) client for real-time dispatch updates */
+/* Real-time dispatch updates via polling.
+   SSE with sync Gunicorn workers holds one thread per connection,
+   so we use lightweight polling instead. */
 (function() {
-    const evtSource = new EventSource("/events/");
+    var pollInterval = 5000;
+    var lastTs = 0;
 
-    evtSource.addEventListener("dispatch-update", function(e) {
-        // Trigger HTMX event so all listening elements refresh
-        htmx.trigger(document.body, "dispatch-changed");
-    });
+    function poll() {
+        fetch("/events/poll/")
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ts > lastTs) {
+                    lastTs = data.ts;
+                    if (lastTs > 0) {
+                        htmx.trigger(document.body, "dispatch-changed");
+                    }
+                }
+            })
+            .catch(function() {});
+    }
 
-    evtSource.onerror = function() {
-        console.warn("SSE connection lost. Reconnecting...");
-    };
+    // Initial timestamp fetch (don't trigger update on first load)
+    fetch("/events/poll/")
+        .then(function(r) { return r.json(); })
+        .then(function(data) { lastTs = data.ts; })
+        .catch(function() {});
+
+    setInterval(poll, pollInterval);
 })();

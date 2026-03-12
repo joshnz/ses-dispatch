@@ -29,6 +29,6 @@ urlpatterns = [
     path("action/queue/<int:crew_id>/<int:job_id>/", dispatch_actions.remove_from_queue_view),
     path("action/reorder-queue/<int:crew_id>/", dispatch_actions.reorder_queue_view),
 
-    # SSE
-    path("events/", sse.sse_stream, name="sse_stream"),
+    # Real-time updates (polling)
+    path("events/poll/", sse.sse_poll, name="sse_poll"),
 ]

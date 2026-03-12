@@ -10,7 +10,8 @@ EnvironmentFile=/opt/ses-dispatch/.env
 ExecStart=/opt/ses-dispatch/.venv/bin/gunicorn \
     config.wsgi:application \
     --bind 127.0.0.1:8000 \
-    --workers 2 \
+    --workers 4 \
+    --threads 4 \
     --timeout 120 \
     --access-logfile /opt/ses-dispatch/logs/access.log \
     --error-logfile /opt/ses-dispatch/logs/error.log
