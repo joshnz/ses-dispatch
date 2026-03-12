@@ -61,6 +61,67 @@
         </button>
     </div>
 </div>
+
+<!-- Queue list for dispatched crews -->
+{% if queue_entries %}
+<div class="info-card p-3 mb-3">
+    <h6 class="mb-2" style="color: var(--ses-orange);">Queued Jobs</h6>
+    <div class="list-group list-group-flush">
+        {% for entry in queue_entries %}
+        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-1">
+            <div>
+                <span class="text-muted small me-1">{{ entry.position }}.</span>
+                <span class="badge bg-priority-{{ entry.job.priority }} me-1">P{{ entry.job.priority }}</span>
+                <a href="#" class="crew-modal-link" data-job-id="{{ entry.job.pk }}">
+                    {{ entry.job.sierra_number }}
+                </a>
+            </div>
+            <button class="btn btn-sm p-0 border-0 crew-remove-queue-btn"
+                    data-crew-id="{{ crew.pk }}" data-job-id="{{ entry.job.pk }}"
+                    title="Remove from queue" style="color: var(--p1-color); line-height: 1;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H5.5l1-1h3l1 1H13.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                </svg>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Add to queue dropdown -->
+{% if pending_jobs %}
+<div class="info-card p-3 mb-3">
+    <h6 class="mb-2" style="color: var(--ses-orange);">Add to Queue</h6>
+    <div class="d-flex gap-2">
+        <select id="queue-job-select" class="form-select form-select-sm flex-grow-1">
+            {% for job in pending_jobs %}
+            <option value="{{ job.pk }}">{{ job.sierra_number }} - P{{ job.priority }} - {{ job.location_address|truncatechars:30 }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-warning btn-sm crew-queue-add-btn" data-crew-id="{{ crew.pk }}">Queue</button>
+    </div>
+</div>
+{% endif %}
+
+{% elif crew.status == "available" %}
+<!-- Dispatch dropdown for available crews -->
+{% if pending_jobs %}
+<div class="info-card p-3 mb-3">
+    <h6 class="mb-2" style="color: var(--ses-orange);">Dispatch to Job</h6>
+    <div class="d-flex gap-2">
+        <select id="dispatch-job-select" class="form-select form-select-sm flex-grow-1">
+            {% for job in pending_jobs %}
+            <option value="{{ job.pk }}">{{ job.sierra_number }} - P{{ job.priority }} - {{ job.location_address|truncatechars:30 }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-warning btn-sm crew-dispatch-btn" data-crew-id="{{ crew.pk }}">Dispatch</button>
+    </div>
+</div>
+{% else %}
+<div class="text-muted small p-3">No pending jobs to dispatch.</div>
+{% endif %}
 {% endif %}
 
 <div class="d-grid gap-2">
@@ -93,26 +154,80 @@
 
 </div>
 
+<!-- Modal container for job detail modals from queue links -->
+<div id="crew-modal-container"></div>
+
 <script>
 (function() {
     var crewId = '{{ crew.pk }}';
+    var csrfToken = '{{ csrf_token }}';
+
+    function postAction(url, body) {
+        return fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: body || ''
+        });
+    }
+
+    function reloadPanel() {
+        htmx.ajax('GET', '/htmx/crew-detail/' + crewId + '/', '#crew-detail-panel');
+    }
+
+    // Simple action buttons (complete, on-scene, return, toggle)
     document.querySelectorAll('.crew-action-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
             var action = this.getAttribute('data-action');
-            var csrfToken = '{{ csrf_token }}';
             btn.disabled = true;
             btn.textContent = 'Processing...';
-            fetch(action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: ''
-            }).then(function() {
-                // Reload the detail panel
-                htmx.ajax('GET', '/htmx/crew-detail/' + crewId + '/', '#crew-detail-panel');
-            });
+            postAction(action).then(reloadPanel);
+        });
+    });
+
+    // Dispatch button for available crews
+    var dispatchBtn = document.querySelector('.crew-dispatch-btn');
+    if (dispatchBtn) {
+        dispatchBtn.addEventListener('click', function() {
+            var jobId = document.getElementById('dispatch-job-select').value;
+            dispatchBtn.disabled = true;
+            dispatchBtn.textContent = 'Dispatching...';
+            postAction('/action/dispatch/', 'job_id=' + jobId + '&crew_id=' + crewId + '&confirmed=1')
+                .then(reloadPanel);
+        });
+    }
+
+    // Queue add button for dispatched crews
+    var queueBtn = document.querySelector('.crew-queue-add-btn');
+    if (queueBtn) {
+        queueBtn.addEventListener('click', function() {
+            var jobId = document.getElementById('queue-job-select').value;
+            queueBtn.disabled = true;
+            queueBtn.textContent = 'Queuing...';
+            postAction('/action/queue/' + crewId + '/add/', 'job_id=' + jobId)
+                .then(reloadPanel);
+        });
+    }
+
+    // Remove from queue buttons
+    document.querySelectorAll('.crew-remove-queue-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var jobId = this.getAttribute('data-job-id');
+            var btnCrewId = this.getAttribute('data-crew-id');
+            btn.disabled = true;
+            postAction('/action/queue/' + btnCrewId + '/' + jobId + '/')
+                .then(reloadPanel);
+        });
+    });
+
+    // Job detail modal links from queue list
+    document.querySelectorAll('.crew-modal-link').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            var jobId = this.getAttribute('data-job-id');
+            htmx.ajax('GET', '/htmx/job-detail/' + jobId + '/', '#crew-modal-container');
         });
     });
 })();

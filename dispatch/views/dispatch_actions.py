@@ -232,7 +232,15 @@ def add_to_queue(request, crew_id):
 @require_http_methods(["POST", "DELETE"])
 def remove_from_queue_view(request, crew_id, job_id):
     crew = get_object_or_404(Crew, pk=crew_id)
+    job = get_object_or_404(Job, pk=job_id)
     do_remove_from_queue(crew, job_id)
+
+    # Reset job to pending if it has no other assignments
+    if not job.assigned_crews.exists() and job.status in ("assigned",):
+        job.status = "pending"
+        job.assigned_at = None
+        job.save()
+
     notify_dispatch_change()
 
     return render(request, "dispatch/partials/crew_card.html", {"crew": crew})

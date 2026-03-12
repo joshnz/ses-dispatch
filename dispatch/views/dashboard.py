@@ -200,6 +200,7 @@ def htmx_job_queue_detail(request, pk):
 @login_required
 def htmx_crew_detail(request, pk):
     from django.utils import timezone
+    from dispatch.models import CrewJobQueue
     crew = get_object_or_404(Crew, pk=pk)
     time_away = None
     if crew.deployed_at:
@@ -213,10 +214,20 @@ def htmx_crew_detail(request, pk):
     if crew.current_job and hasattr(crew.current_job, "photos"):
         photos = crew.current_job.photos.all()
 
+    # Pending jobs for dispatch/queue dropdown
+    pending_jobs = Job.objects.filter(status="pending")
+
+    # Queue entries (exclude position 0 which is the active job)
+    queue_entries = CrewJobQueue.objects.filter(
+        crew=crew, position__gt=0
+    ).select_related("job").order_by("position")
+
     return render(request, "dispatch/partials/crew_detail_panel.html", {
         "crew": crew,
         "time_away": time_away,
         "photos": photos,
+        "pending_jobs": pending_jobs,
+        "queue_entries": queue_entries,
     })
 
 
