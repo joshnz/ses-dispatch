@@ -17,5 +17,12 @@
         {% endif %}
     </td>
     <td>{{ job.age_minutes }}m</td>
-    <td></td>
+    <td class="text-center">
+        {% if job.photos.count > 0 %}
+        <span title="{{ job.photos.count }} photo{{ job.photos.count|pluralize }}" style="color: var(--ses-orange);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M4.502 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/><path d="M14.002 13a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2V5A2 2 0 0 1 2 3h10a2 2 0 0 1 2 2v8zm-10.44-5a.5.5 0 0 0-.389.188l-2.173 2.7V13a1 1 0 0 0 1 1h10a1 1 0 0 0 .971-.757L9.168 8.85a.5.5 0 0 0-.764-.07L5.965 11.22a.5.5 0 0 1-.764-.07L3.562 8.19z"/></svg>
+            <small>{{ job.photos.count }}</small>
+        </span>
+        {% endif %}
+    </td>
 </tr>

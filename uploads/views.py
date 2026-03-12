@@ -5,7 +5,7 @@ from django.core.files.base import ContentFile
 from django.shortcuts import render, redirect, get_object_or_404
 from PIL import Image
 
-from dispatch.views.sse import notify_dispatch_change
+from dispatch.views.sse import notify_photo_upload
 from .forms import PhotoUploadForm
 from .models import UploadToken
 
@@ -42,7 +42,10 @@ def upload_form(request, token):
             photo.save()
             upload_token.upload_count += 1
             upload_token.save()
-            notify_dispatch_change()
+            notify_photo_upload(
+                upload_token.job.sierra_number,
+                upload_token.job.photos.count(),
+            )
             return redirect("upload_success", token=token)
     else:
         form = PhotoUploadForm()
