@@ -1,0 +1,34 @@
+<tr>
+    <td>
+        <a href="#" hx-get="/htmx/job-detail/{{ job.pk }}/"
+           hx-target="#modal-container" hx-swap="innerHTML">
+            {{ job.sierra_number }}
+        </a>
+    </td>
+    <td><span class="badge bg-priority-{{ job.priority }}">P{{ job.priority }}</span></td>
+    <td>{{ job.location_address|truncatechars:40 }}</td>
+    <td><span class="badge bg-{{ job.status_color }}">{{ job.get_status_display }}</span></td>
+    <td>
+        {% for crew in job.assigned_crews.all %}
+        {{ crew.callsign }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+        {% if job.assigned_crews.count > 1 %}
+        <span class="badge bg-info">+{{ job.assigned_crews.count|add:"-1" }}</span>
+        {% endif %}
+    </td>
+    <td>{{ job.age_minutes }}m</td>
+    <td>
+        {% if job.status == "pending" or job.status == "assigned" %}
+        <div class="btn-group btn-group-sm">
+            <form hx-post="/action/complete/{{ job.pk }}/" hx-swap="none" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-success">Complete</button>
+            </form>
+            <form hx-post="/action/cancel/{{ job.pk }}/" hx-swap="none" class="d-inline ms-1">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger">Cancel</button>
+            </form>
+        </div>
+        {% endif %}
+    </td>
+</tr>

@@ -1,0 +1,33 @@
+<div class="modal fade show" id="multiDispatchModal" style="display:block">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">Additional Crew Dispatch</h5>
+                <button type="button" class="btn-close"
+                        onclick="this.closest('.modal').remove(); document.querySelector('.modal-backdrop')?.remove()"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>{{ job.sierra_number }}</strong> is already assigned to:
+                   <strong>{{ existing_crew_names }}</strong></p>
+                <p>Dispatch <strong>{{ new_crew.callsign }}</strong> as an additional
+                   crew to this job?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                        onclick="this.closest('.modal').remove(); document.querySelector('.modal-backdrop')?.remove()">
+                    Cancel
+                </button>
+                <form hx-post="/action/dispatch/" hx-target="#main-content" hx-swap="innerHTML">
+                    {% csrf_token %}
+                    <input type="hidden" name="job_id" value="{{ job.pk }}">
+                    <input type="hidden" name="crew_id" value="{{ new_crew.pk }}">
+                    <input type="hidden" name="confirmed" value="true">
+                    <button type="submit" class="btn btn-warning">
+                        Confirm Dispatch
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show"></div>

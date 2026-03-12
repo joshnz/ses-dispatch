@@ -1,0 +1,18 @@
+{% if photos %}
+<div class="photo-gallery">
+    <h6>Photos ({{ photos|length }})</h6>
+    <div class="row g-2">
+        {% for photo in photos %}
+        <div class="col-4 col-md-3">
+            <a href="{{ photo.image.url }}" target="_blank">
+                <img src="{{ photo.thumbnail.url }}" alt="Job photo"
+                     class="img-thumbnail w-100">
+            </a>
+            {% if photo.description %}
+            <small class="text-muted d-block">{{ photo.description }}</small>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

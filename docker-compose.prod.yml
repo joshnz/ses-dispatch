@@ -1,0 +1,32 @@
+services:
+  web:
+    build: .
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.prod
+    env_file: .env
+    depends_on: [db]
+    restart: always
+
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: dispatch
+      POSTGRES_USER: dispatch
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    restart: always
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+    depends_on: [web]
+    restart: always
+
+volumes:
+  pgdata:
+  caddy_data:

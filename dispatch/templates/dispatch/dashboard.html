@@ -1,0 +1,100 @@
+{% extends "dispatch/base.html" %}
+{% load static %}
+
+{% block title %}ICP Dashboard - SES Dispatch{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Metrics row -->
+    <div class="col-12">
+        <div hx-get="/htmx/metrics/" hx-trigger="dispatch-changed" hx-swap="innerHTML"
+             id="metrics-panel">
+            {% include "dispatch/partials/metrics.html" %}
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <!-- Left column: Job Queue + Recommendations -->
+    <div class="col-lg-7">
+        <!-- Job Queue -->
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Job Queue</h5>
+                <span class="badge bg-warning">{{ pending_count }} pending</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Sierra #</th>
+                                <th>Priority</th>
+                                <th>Address</th>
+                                <th>Status</th>
+                                <th>Crew(s)</th>
+                                <th>Age</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in jobs %}
+                            {% include "dispatch/partials/job_row.html" %}
+                            {% empty %}
+                            <tr><td colspan="7" class="text-center text-muted">No active jobs</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">Dispatch Recommendations</h5>
+            </div>
+            <div class="card-body">
+                {% for rec in recommendations %}
+                {% include "dispatch/partials/queue_suggestion_card.html" %}
+                {% empty %}
+                <p class="text-muted">No recommendations available.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right column: Map + Crew Status -->
+    <div class="col-lg-5">
+        <!-- Map -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">Dispatch Map</h5>
+            </div>
+            <div class="card-body p-0">
+                <div id="dispatch-map" style="height: 400px;"></div>
+            </div>
+        </div>
+
+        <!-- Crew Status -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Crew Status</h5>
+                <span class="badge bg-success">{{ available_crews }} available</span>
+            </div>
+            <div class="card-body">
+                {% for crew in crews %}
+                {% include "dispatch/partials/crew_card.html" %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal container for HTMX modals -->
+<div id="modal-container"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/map.js' %}"></script>
+{% endblock %}

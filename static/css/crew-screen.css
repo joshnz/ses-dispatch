@@ -1,0 +1,65 @@
+/* SES Dispatch - Crew Screen (Mobile) Styles */
+
+.crew-screen-body {
+    background-color: #1B1B1B;
+    color: white;
+    min-height: 100vh;
+}
+
+.crew-selector .form-select {
+    font-size: 1.1rem;
+}
+
+.crew-status-banner {
+    text-align: center;
+}
+
+.crew-status-banner small {
+    color: rgba(255,255,255,0.8);
+}
+
+/* Job card on crew screen */
+.crew-screen-body .card {
+    background-color: #2c2c2c;
+    border-color: #444;
+    color: #eee;
+}
+
+.crew-screen-body .card-header {
+    background-color: #333;
+    border-color: #444;
+}
+
+.detail-label {
+    display: block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.next-job-row {
+    border-color: #444 !important;
+}
+
+/* Priority badges */
+.bg-priority-1 { background-color: #dc3545 !important; }
+.bg-priority-2 { background-color: #fd7e14 !important; }
+.bg-priority-3 { background-color: #198754 !important; }
+
+/* Big action buttons */
+.crew-screen-body .btn-lg {
+    font-size: 1.2rem;
+    padding: 12px;
+}
+
+/* Photo strip */
+.photo-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 8px 0;
+}
+
+.photo-strip img {
+    border-radius: 4px;
+}

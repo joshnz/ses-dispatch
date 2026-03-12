@@ -1,0 +1,14 @@
+django>=5.1
+django-environ
+django-allauth
+django-htmx
+django-storages[azure]
+django-storages[boto3]
+psycopg[binary]
+Pillow
+gunicorn
+uvicorn[standard]
+whitenoise
+geopy
+openrouteservice
+twilio

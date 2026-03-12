@@ -1,0 +1,21 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Footscray SES Coverage Area"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [144.8500, -37.7800],
+                    [144.9500, -37.7800],
+                    [144.9500, -37.8300],
+                    [144.8500, -37.8300],
+                    [144.8500, -37.7800]
+                ]]
+            }
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+services:
+  web:
+    build: .
+    command: uvicorn config.asgi:application --host 0.0.0.0 --port 8000
+    environment:
+      - DATABASE_URL=postgis://dispatch:dispatch@db:5432/dispatch
+    ports: ["8000:8000"]
+    depends_on: [db]
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: dispatch
+      POSTGRES_USER: dispatch
+      POSTGRES_PASSWORD: dispatch
+    volumes: [pgdata:/var/lib/postgresql/data]
+volumes:
+  pgdata:

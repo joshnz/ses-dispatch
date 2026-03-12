@@ -1,0 +1,65 @@
+{% extends "dispatch/base.html" %}
+
+{% block title %}Job Queue - SES Dispatch{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">All Jobs</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th>Sierra #</th>
+                        <th>Priority</th>
+                        <th>Address</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Crew(s)</th>
+                        <th>Age</th>
+                        <th>Photos</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                    <tr>
+                        <td>
+                            <a href="#" hx-get="/htmx/job-detail/{{ job.pk }}/"
+                               hx-target="#modal-container" hx-swap="innerHTML">
+                                {{ job.sierra_number }}
+                            </a>
+                        </td>
+                        <td><span class="badge bg-priority-{{ job.priority }}">P{{ job.priority }}</span></td>
+                        <td>{{ job.location_address|truncatechars:40 }}</td>
+                        <td>{{ job.description|truncatechars:50 }}</td>
+                        <td><span class="badge bg-{{ job.status_color }}">{{ job.get_status_display }}</span></td>
+                        <td>
+                            {% for crew in job.assigned_crews.all %}
+                            {{ crew.callsign }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>{{ job.age_minutes }}m</td>
+                        <td>{{ job.photos.count }}</td>
+                        <td>
+                            {% if job.status == "pending" or job.status == "assigned" %}
+                            <form hx-post="/action/complete/{{ job.pk }}/" hx-swap="none">
+                                {% csrf_token %}
+                                <button class="btn btn-sm btn-outline-success">Complete</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="9" class="text-center text-muted">No jobs</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="modal-container"></div>
+{% endblock %}

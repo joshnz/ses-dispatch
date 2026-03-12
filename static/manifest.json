@@ -1,0 +1,8 @@
+{
+    "name": "SES Dispatch - Crew",
+    "short_name": "SES Crew",
+    "start_url": "/crew-screen/",
+    "display": "standalone",
+    "background_color": "#E65100",
+    "theme_color": "#E65100"
+}

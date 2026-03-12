@@ -1,0 +1,186 @@
+[
+    {
+        "model": "dispatch.job",
+        "pk": 1,
+        "fields": {
+            "sierra_number": "S-2026-0301",
+            "location_address": "12 Hampstead Rd, Maidstone VIC 3012",
+            "location": "POINT(144.8780 -37.7920)",
+            "caller_name": "Margaret Wilson",
+            "caller_phone": "0412 345 678",
+            "description": "Large tree fallen across driveway, blocking access. Caller elderly, unable to leave property.",
+            "priority": 3,
+            "other_agencies": [],
+            "status": "pending"
+        }
+    },
+    {
+        "model": "dispatch.job",
+        "pk": 2,
+        "fields": {
+            "sierra_number": "S-2026-0302",
+            "location_address": "42 Barkly St, Footscray VIC 3011",
+            "location": "POINT(144.8990 -37.7998)",
+            "caller_name": "John Nguyen",
+            "caller_phone": "0423 456 789",
+            "description": "Roof tiles displaced by wind, water entering bedroom. Tarp needed urgently.",
+            "priority": 3,
+            "other_agencies": [],
+            "status": "pending"
+        }
+    },
+    {
+        "model": "dispatch.job",
+        "pk": 3,
+        "fields": {
+            "sierra_number": "S-2026-0303",
+            "location_address": "8 Somerville Rd, Yarraville VIC 3013",
+            "location": "POINT(144.8750 -37.8165)",
+            "caller_name": "Sarah Ahmed",
+            "caller_phone": "0434 567 890",
+            "description": "Flooding in garage from blocked stormwater drain. Water rising slowly.",
+            "priority": 3,
+            "other_agencies": [],
+            "status": "pending"
+        }
+    },
+    {
+        "model": "dispatch.job",
+        "pk": 4,
+        "fields": {
+            "sierra_number": "S-2026-0304",
+            "location_address": "120 Gordon St, Footscray VIC 3011",
+            "location": "POINT(144.8830 -37.8010)",
+            "caller_name": "Peter Smith",
+            "caller_phone": "0445 678 901",
+            "description": "Tree branch on power lines in street. Western Power notified.",
+            "priority": 1,
+            "other_agencies": ["AusNet Services"],
+            "status": "pending"
+        }
+    },
+    {
+        "model": "dispatch.job",
+        "pk": 5,
+        "fields": {
+            "sierra_number": "S-2026-0305",
+            "location_address": "23 Williamstown Rd, Seddon VIC 3011",
+            "location": "POINT(144.8910 -37.8070)",
+            "caller_name": "Lisa Chen",
+            "caller_phone": "0456 789 012",
+            "description": "Fence panels blown onto road causing traffic hazard.",
+            "priority": 3,
+            "other_agencies": ["VicPol"],
+            "status": "pending"
+        }
+    },
+    {
+        "model": "dispatch.job",
+        "pk": 6,
+        "fields": {
+            "sierra_number": "S-2026-0306",
+            "location_address": "55 Rosamond Rd, Maidstone VIC 3012",
+            "location": "POINT(144.8680 -37.7910)",
+            "caller_name": "David Brown",
+            "caller_phone": "0467 890 123",
+            "description": "Flooding in backyard, water approaching rear of house. Sandbags requested.",
+            "priority": 3,
+            "other_agencies": [],
+            "status": "pending"
+        }
+    },
+    {
+        "model": "dispatch.job",
+        "pk": 7,
+        "fields": {
+            "sierra_number": "S-2026-0307",
+            "location_address": "600 Bourke St, Melbourne VIC 3000",
+            "location": "POINT(144.9460 -37.8100)",
+            "caller_name": "Anna Kowalski",
+            "caller_phone": "0478 901 234",
+            "description": "Broken window from flying debris, wind and rain entering commercial property.",
+            "priority": 3,
+            "other_agencies": [],
+            "status": "pending"
+        }
+    },
+    {
+        "model": "dispatch.job",
+        "pk": 8,
+        "fields": {
+            "sierra_number": "S-2026-0308",
+            "location_address": "31 Francis St, Yarraville VIC 3013",
+            "location": "POINT(144.8680 -37.8130)",
+            "caller_name": "Michael O'Brien",
+            "caller_phone": "0489 012 345",
+            "description": "Tree leaning dangerously over house, has not yet fallen.",
+            "priority": 1,
+            "other_agencies": ["CFA"],
+            "status": "pending"
+        }
+    },
+    {
+        "model": "dispatch.crew",
+        "pk": 1,
+        "fields": {
+            "callsign": "GR1",
+            "vehicle_type": "Medium Rescue Truck",
+            "status": "available",
+            "crew_size": 4,
+            "capabilities": ["general", "chainsaw", "pump", "tarp", "road_clearance", "heavy_duty"],
+            "current_job": null,
+            "deployed_at": null,
+            "location": "POINT(144.8875 -37.7987)",
+            "speed_kmh": 0,
+            "heading": 0
+        }
+    },
+    {
+        "model": "dispatch.crew",
+        "pk": 2,
+        "fields": {
+            "callsign": "LR1",
+            "vehicle_type": "Light Rescue Truck",
+            "status": "available",
+            "crew_size": 3,
+            "capabilities": ["general", "chainsaw", "tarp", "road_clearance"],
+            "current_job": null,
+            "deployed_at": null,
+            "location": "POINT(144.8780 -37.7920)",
+            "speed_kmh": 0,
+            "heading": 0
+        }
+    },
+    {
+        "model": "dispatch.crew",
+        "pk": 3,
+        "fields": {
+            "callsign": "S1",
+            "vehicle_type": "Support Ute",
+            "status": "available",
+            "crew_size": 2,
+            "capabilities": ["general", "chainsaw", "tarp", "sandbagging"],
+            "current_job": null,
+            "deployed_at": null,
+            "location": "POINT(144.8930 -37.8105)",
+            "speed_kmh": 0,
+            "heading": 0
+        }
+    },
+    {
+        "model": "dispatch.crew",
+        "pk": 4,
+        "fields": {
+            "callsign": "S2",
+            "vehicle_type": "Support Ute",
+            "status": "available",
+            "crew_size": 2,
+            "capabilities": ["general", "tarp", "sandbagging"],
+            "current_job": null,
+            "deployed_at": null,
+            "location": "POINT(144.8885 -37.7993)",
+            "speed_kmh": 0,
+            "heading": 0
+        }
+    }
+]

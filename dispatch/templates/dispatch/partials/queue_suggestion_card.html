@@ -1,0 +1,45 @@
+<div class="card mb-2 {% if rec.rec_type == 'primary' %}border-success{% elif rec.rec_type == 'alternate' %}border-info{% elif rec.rec_type == 'queue' %}border-warning{% endif %}">
+    <div class="card-body py-2 px-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <span class="badge
+                    {% if rec.rec_type == 'primary' %}bg-success
+                    {% elif rec.rec_type == 'alternate' %}bg-info
+                    {% elif rec.rec_type == 'queue' %}bg-warning text-dark
+                    {% else %}bg-secondary{% endif %}">
+                    {{ rec.rec_type|title }}
+                </span>
+                <strong>{{ rec.crew.callsign }}</strong>
+                &rarr;
+                <strong>{{ rec.job.sierra_number }}</strong>
+                <span class="badge bg-priority-{{ rec.job.priority }}">P{{ rec.job.priority }}</span>
+            </div>
+            <div>
+                <small class="text-muted me-2">
+                    Score: {{ rec.dispatch_score }} | {{ rec.travel_mins }} min
+                </small>
+                {% if rec.rec_type == 'queue' %}
+                <form hx-post="/action/queue/{{ rec.crew.pk }}/add/"
+                      hx-target="#main-content" hx-swap="innerHTML" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="job_id" value="{{ rec.job.pk }}">
+                    <button class="btn btn-sm btn-warning">Add to Queue</button>
+                </form>
+                {% else %}
+                <form hx-post="/action/dispatch/"
+                      hx-target="#main-content" hx-swap="innerHTML" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="job_id" value="{{ rec.job.pk }}">
+                    <input type="hidden" name="crew_id" value="{{ rec.crew.pk }}">
+                    <button class="btn btn-sm btn-success">Dispatch Now</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% if rec.rec_type == 'queue' %}
+        <small class="text-muted">
+            {{ rec.crew.callsign }} is busy. Queue position: {{ rec.queue_position }}
+        </small>
+        {% endif %}
+    </div>
+</div>
