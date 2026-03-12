@@ -69,12 +69,8 @@
                         </div>
                     </div>
                     {% if data.crew.status == "available" %}
-                    <form hx-post="/action/dispatch/" hx-swap="none" class="ms-2">
-                        {% csrf_token %}
-                        <input type="hidden" name="job_id" value="{{ rec.job.pk }}">
-                        <input type="hidden" name="crew_id" value="{{ rec.crew.pk }}">
-                        <button class="btn btn-warning btn-sm">Dispatch</button>
-                    </form>
+                    <button class="btn btn-warning btn-sm ms-2 rec-dispatch-btn"
+                            data-job-id="{{ rec.job.pk }}" data-crew-id="{{ rec.crew.pk }}">Dispatch</button>
                     {% else %}
                     <span class="badge bg-secondary ms-2">Next up</span>
                     {% endif %}
@@ -95,36 +91,31 @@
                         </div>
                     </div>
                     {% if data.crew.status == "available" %}
-                    <form hx-post="/action/dispatch/" hx-swap="none" class="ms-2">
-                        {% csrf_token %}
-                        <input type="hidden" name="job_id" value="{{ rec.job.pk }}">
-                        <input type="hidden" name="crew_id" value="{{ rec.crew.pk }}">
-                        <button class="btn btn-outline-secondary btn-sm">Dispatch</button>
-                    </form>
+                    <button class="btn btn-outline-secondary btn-sm ms-2 rec-dispatch-btn"
+                            data-job-id="{{ rec.job.pk }}" data-crew-id="{{ rec.crew.pk }}">Dispatch</button>
                     {% endif %}
                 </div>
                 {% endfor %}
 
-                <!-- Queue suggestions -->
-                {% for rec in data.queue %}
+                <!-- Queue suggestion (top recommendation only) -->
+                {% with top_queue=data.queue|first %}
+                {% if top_queue %}
                 <div class="d-flex align-items-center justify-content-between py-1 border-bottom">
                     <div class="flex-grow-1">
                         <span class="badge me-1" style="background: var(--p3-color); color: #fff; min-width: 70px;">Queue</span>
-                        <span class="badge bg-priority-{{ rec.job.priority }}">P{{ rec.job.priority }}</span>
-                        <strong>{{ rec.job.sierra_number }}</strong>
-                        <span class="text-muted small">{{ rec.job.description|truncatechars:40 }}</span>
+                        <span class="badge bg-priority-{{ top_queue.job.priority }}">P{{ top_queue.job.priority }}</span>
+                        <strong>{{ top_queue.job.sierra_number }}</strong>
+                        <span class="text-muted small">{{ top_queue.job.description|truncatechars:40 }}</span>
                         <div class="small text-muted">
-                            ETA: {{ rec.travel_mins }}m | Score: {{ rec.dispatch_score }}
-                            | Pos: {{ rec.queue_position }}
+                            ETA: {{ top_queue.travel_mins }}m | Score: {{ top_queue.dispatch_score }}
+                            | Pos: {{ top_queue.queue_position }}
                         </div>
                     </div>
-                    <form hx-post="/action/queue/{{ rec.crew.pk }}/add/" hx-swap="none" class="ms-2">
-                        {% csrf_token %}
-                        <input type="hidden" name="job_id" value="{{ rec.job.pk }}">
-                        <button class="btn btn-warning btn-sm">Queue</button>
-                    </form>
+                    <button class="btn btn-warning btn-sm ms-2 rec-queue-btn"
+                            data-crew-id="{{ top_queue.crew.pk }}" data-job-id="{{ top_queue.job.pk }}">Queue</button>
                 </div>
-                {% endfor %}
+                {% endif %}
+                {% endwith %}
 
                 {% if not data.primary and not data.alternate and not data.queue and not data.crew.current_job %}
                 <div class="text-muted small py-2">No recommendations</div>
@@ -155,21 +146,56 @@
 {% block extra_js %}
 <script>
 (function() {
+    var csrfToken = '{{ csrf_token }}';
+
+    function postAction(url, body) {
+        return fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: body || ''
+        });
+    }
+
+    // Simple action buttons (complete, return to base)
     document.querySelectorAll('.rec-action-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
             var action = this.getAttribute('data-action');
             btn.disabled = true;
             btn.textContent = 'Processing...';
-            fetch(action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: ''
-            }).then(function() {
+            postAction(action).then(function() {
                 window.location.reload();
             });
+        });
+    });
+
+    // Dispatch buttons (primary/alternate)
+    document.querySelectorAll('.rec-dispatch-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var jobId = this.getAttribute('data-job-id');
+            var crewId = this.getAttribute('data-crew-id');
+            btn.disabled = true;
+            btn.textContent = 'Dispatching...';
+            postAction('/action/dispatch/', 'job_id=' + jobId + '&crew_id=' + crewId + '&confirmed=1')
+                .then(function() {
+                    window.location.reload();
+                });
+        });
+    });
+
+    // Queue buttons
+    document.querySelectorAll('.rec-queue-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var crewId = this.getAttribute('data-crew-id');
+            var jobId = this.getAttribute('data-job-id');
+            btn.disabled = true;
+            btn.textContent = 'Queuing...';
+            postAction('/action/queue/' + crewId + '/add/', 'job_id=' + jobId)
+                .then(function() {
+                    window.location.reload();
+                });
         });
     });
 })();
