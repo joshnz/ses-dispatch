@@ -63,9 +63,11 @@
                 </table>
                 {% endif %}
             </div>
+            <div id="upload-link-result"></div>
             <div class="modal-footer">
                 {% if job.status == "pending" or job.status == "assigned" %}
-                <form hx-post="/action/send-upload-link/{{ job.pk }}/" hx-swap="none">
+                <form hx-post="/action/send-upload-link/{{ job.pk }}/"
+                      hx-target="#upload-link-result" hx-swap="innerHTML">
                     {% csrf_token %}
                     <button class="btn btn-outline-primary">Send Upload Link</button>
                 </form>

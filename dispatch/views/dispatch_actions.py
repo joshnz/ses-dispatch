@@ -176,6 +176,7 @@ def toggle_crew(request, crew_id):
 def send_upload_link(request, job_id):
     from uploads.models import UploadToken
     from datetime import timedelta
+    from django.http import HttpResponse
 
     job = get_object_or_404(Job, pk=job_id)
     token = UploadToken.objects.create(
@@ -184,6 +185,7 @@ def send_upload_link(request, job_id):
 
     upload_url = request.build_absolute_uri(f"/upload/{token.token}/")
 
+    sms_sent = False
     if getattr(request, "settings", None) and getattr(request.settings, "TWILIO_ENABLED", False):
         from twilio.rest import Client
         from django.conf import settings
@@ -193,14 +195,23 @@ def send_upload_link(request, job_id):
             from_=settings.TWILIO_FROM_NUMBER,
             to=job.caller_phone.replace(" ", ""),
         )
-        messages.success(request, f"Upload link sent via SMS to {job.caller_phone}")
-    else:
-        logger.info("Upload link for %s: %s", job.sierra_number, upload_url)
-        messages.success(request,
-            f"Upload link for {job.sierra_number}: {upload_url}"
-        )
+        sms_sent = True
 
-    return redirect("dashboard")
+    logger.info("Upload link for %s: %s", job.sierra_number, upload_url)
+
+    html = (
+        '<div class="alert alert-success mt-2">'
+        f'<strong>Upload link generated for {job.sierra_number}</strong><br>'
+    )
+    if sms_sent:
+        html += f'<small>SMS sent to {job.caller_phone}</small><br>'
+    html += (
+        f'<input type="text" class="form-control form-control-sm mt-1" '
+        f'value="{upload_url}" readonly onclick="this.select()">'
+        '<small class="text-muted">Click to select, then copy</small>'
+        '</div>'
+    )
+    return HttpResponse(html)
 
 
 @login_required
