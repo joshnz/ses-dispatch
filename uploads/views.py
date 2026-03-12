@@ -43,7 +43,7 @@ def upload_form(request, token):
             upload_token.upload_count += 1
             upload_token.save()
             notify_dispatch_change()
-            return redirect("upload_success")
+            return redirect("upload_success", token=token)
     else:
         form = PhotoUploadForm()
 
@@ -54,5 +54,5 @@ def upload_form(request, token):
     })
 
 
-def upload_success(request):
+def upload_success(request, token):
     return render(request, "uploads/upload_success.html")
