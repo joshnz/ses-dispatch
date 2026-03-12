@@ -1,0 +1,67 @@
+<div id="rtb-modal-wrapper">
+    <div class="modal fade show" style="display:block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background: var(--ses-orange); color: #fff;">
+                    <h5 class="modal-title">Return to Base &mdash; {{ crew.callsign }}</h5>
+                    <button type="button" class="btn-close btn-close-white"
+                            onclick="document.getElementById('rtb-modal-wrapper').remove()"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>{{ crew.callsign }}</strong> is currently assigned to
+                       <strong>{{ crew.current_job.sierra_number }}</strong>
+                       (P{{ crew.current_job.priority }} &mdash; {{ crew.current_job.location_address|truncatechars:50 }}).</p>
+                    <p>How should the current job be handled?</p>
+                </div>
+                <div class="modal-footer d-flex flex-column gap-2 align-items-stretch">
+                    <button class="btn btn-success w-100 rtb-modal-btn"
+                            data-mode="complete">
+                        Mark job as complete &amp; return to base
+                    </button>
+                    <button class="btn btn-warning w-100 rtb-modal-btn"
+                            data-mode="pending">
+                        Return job to pending &amp; return to base
+                    </button>
+                    <button class="btn btn-secondary w-100"
+                            onclick="document.getElementById('rtb-modal-wrapper').remove()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"
+         onclick="document.getElementById('rtb-modal-wrapper').remove()"></div>
+</div>
+
+<script>
+(function() {
+    var crewId = '{{ crew.pk }}';
+    var csrfToken = '{{ csrf_token }}';
+
+    document.querySelectorAll('.rtb-modal-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var mode = this.getAttribute('data-mode');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            fetch('/action/return-to-base/' + crewId + '/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'mode=' + mode
+            }).then(function() {
+                document.getElementById('rtb-modal-wrapper').remove();
+                // Reload the crew detail panel if it exists, otherwise reload page
+                var panel = document.getElementById('crew-detail-panel');
+                if (panel) {
+                    htmx.ajax('GET', '/htmx/crew-detail/' + crewId + '/', '#crew-detail-panel');
+                } else {
+                    window.location.reload();
+                }
+            });
+        });
+    });
+})();
+</script>

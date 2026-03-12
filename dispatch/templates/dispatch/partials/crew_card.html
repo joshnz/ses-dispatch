@@ -51,10 +51,26 @@
                 <button class="btn btn-sm btn-warning">On Scene</button>
             </form>
             {% elif crew.status == "on_scene" %}
-            <form hx-post="/action/return-to-base/{{ crew.pk }}/" hx-target="#crew-{{ crew.pk }}" hx-swap="outerHTML" class="d-inline">
-                {% csrf_token %}
-                <button class="btn btn-sm btn-info">Return to Base</button>
-            </form>
+            <button class="btn btn-sm btn-info card-rtb-btn"
+                    data-crew-id="{{ crew.pk }}"
+                    onclick="(function(btn){
+                        var cid = btn.getAttribute('data-crew-id');
+                        btn.disabled = true;
+                        fetch('/action/return-to-base/' + cid + '/', {
+                            method: 'POST',
+                            headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
+                            body: ''
+                        }).then(function(r){return r.text();}).then(function(html){
+                            if (html.indexOf('rtb-modal-wrapper') !== -1) {
+                                var mc = document.getElementById('modal-container');
+                                if (!mc) { mc = document.createElement('div'); mc.id='modal-container'; document.body.appendChild(mc); }
+                                mc.innerHTML = html;
+                                btn.disabled = false;
+                            } else {
+                                window.location.reload();
+                            }
+                        });
+                    })(this)">Return to Base</button>
             {% elif crew.status == "available" or crew.status == "offline" %}
             <form hx-post="/action/toggle-crew/{{ crew.pk }}/" hx-target="#crew-{{ crew.pk }}" hx-swap="outerHTML" class="d-inline">
                 {% csrf_token %}

@@ -124,8 +124,8 @@
                 <!-- Return to base button -->
                 {% if data.crew.deployed_at %}
                 <div class="mt-2">
-                    <button class="btn btn-info btn-sm w-100 rec-action-btn"
-                            data-action="/action/return-to-base/{{ data.crew.pk }}/">
+                    <button class="btn btn-info btn-sm w-100 rec-rtb-btn"
+                            data-crew-id="{{ data.crew.pk }}">
                         Return to Base{% if data.time_away %} ({{ data.time_away }}){% endif %}
                     </button>
                 </div>
@@ -181,6 +181,26 @@
             postAction('/action/dispatch/', 'job_id=' + jobId + '&crew_id=' + crewId + '&confirmed=1')
                 .then(function() {
                     window.location.reload();
+                });
+        });
+    });
+
+    // Return to base buttons (shows modal if crew has current job)
+    document.querySelectorAll('.rec-rtb-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var rtbCrewId = this.getAttribute('data-crew-id');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            postAction('/action/return-to-base/' + rtbCrewId + '/')
+                .then(function(resp) { return resp.text(); })
+                .then(function(html) {
+                    if (html.indexOf('rtb-modal-wrapper') !== -1) {
+                        document.getElementById('modal-container').innerHTML = html;
+                        btn.disabled = false;
+                        btn.textContent = 'Return to Base';
+                    } else {
+                        window.location.reload();
+                    }
                 });
         });
     });

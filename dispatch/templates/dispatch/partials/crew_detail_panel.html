@@ -133,8 +133,8 @@
     {% endif %}
 
     {% if crew.deployed_at %}
-    <button class="btn btn-info w-100 crew-action-btn"
-            data-action="/action/return-to-base/{{ crew.pk }}/">
+    <button class="btn btn-info w-100 crew-rtb-btn"
+            data-crew-id="{{ crew.pk }}">
         Return to Base{% if time_away %} (away {{ time_away }}){% endif %}
     </button>
     {% endif %}
@@ -208,6 +208,28 @@
             queueBtn.textContent = 'Queuing...';
             postAction('/action/queue/' + crewId + '/add/', 'job_id=' + jobId)
                 .then(reloadPanel);
+        });
+    }
+
+    // Return to base button (shows modal if crew has current job)
+    var rtbBtn = document.querySelector('.crew-rtb-btn');
+    if (rtbBtn) {
+        rtbBtn.addEventListener('click', function() {
+            var rtbCrewId = this.getAttribute('data-crew-id');
+            rtbBtn.disabled = true;
+            rtbBtn.textContent = 'Processing...';
+            postAction('/action/return-to-base/' + rtbCrewId + '/')
+                .then(function(resp) { return resp.text(); })
+                .then(function(html) {
+                    if (html.indexOf('rtb-modal-wrapper') !== -1) {
+                        // Modal returned - insert it
+                        document.getElementById('crew-modal-container').innerHTML = html;
+                        rtbBtn.disabled = false;
+                        rtbBtn.textContent = 'Return to Base';
+                    } else {
+                        reloadPanel();
+                    }
+                });
         });
     }
 

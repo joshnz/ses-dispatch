@@ -150,7 +150,64 @@ def on_scene(request, crew_id):
 @require_POST
 def return_to_base(request, crew_id):
     crew = get_object_or_404(Crew, pk=crew_id)
+    mode = request.POST.get("mode", "")
+
+    # If crew has a current job and no mode specified, show the modal
+    if crew.current_job and not mode:
+        return render(request, "dispatch/partials/return_to_base_modal.html", {
+            "crew": crew,
+        })
+
+    if mode == "complete" and crew.current_job:
+        job = crew.current_job
+        job.status = "completed"
+        job.completed_at = timezone.now()
+        job.save()
+
+        Assignment.objects.filter(
+            job=job, completed_at__isnull=True
+        ).update(completed_at=timezone.now())
+
+        # Free other crews assigned to this job
+        for other_crew in Crew.objects.filter(current_job=job).exclude(pk=crew.pk):
+            next_entry = promote_next_job(other_crew)
+            if next_entry:
+                other_crew.status = "dispatched"
+                other_crew.current_job = next_entry.job
+                other_crew.deployed_at = timezone.now()
+                other_crew.save()
+                next_entry.job.status = "assigned"
+                next_entry.job.assigned_at = timezone.now()
+                next_entry.job.save()
+                Assignment.objects.create(
+                    job=next_entry.job, crew=other_crew,
+                    dispatched_by=request.user,
+                    notes=f"Auto-dispatched from queue (was on {job.sierra_number})",
+                )
+            else:
+                other_crew.status = "available"
+                other_crew.current_job = None
+                other_crew.speed_kmh = 0
+                other_crew.save()
+
+    elif mode == "pending" and crew.current_job:
+        job = crew.current_job
+        # Check if other crews are still assigned
+        other_assigned = Crew.objects.filter(current_job=job).exclude(pk=crew.pk)
+        if not other_assigned.exists():
+            job.status = "pending"
+            job.assigned_at = None
+            job.save()
+
+        Assignment.objects.filter(
+            crew=crew, job=job, completed_at__isnull=True
+        ).update(completed_at=timezone.now(), notes="Returned to base - job returned to pending")
+
+    # Clear crew's current job and queue entry, mark as returning
+    from dispatch.models import CrewJobQueue
+    CrewJobQueue.objects.filter(crew=crew, position=0).delete()
     crew.status = "returning"
+    crew.current_job = None
     crew.save()
 
     notify_dispatch_change()
