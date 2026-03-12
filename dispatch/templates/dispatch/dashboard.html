@@ -15,9 +15,8 @@
 </div>
 
 <div class="row mt-3">
-    <!-- Left column: Job Queue + Recommendations -->
+    <!-- Left column: Job Queue -->
     <div class="col-lg-7">
-        <!-- Job Queue -->
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Job Queue</h5>
@@ -48,44 +47,16 @@
                 </div>
             </div>
         </div>
-
-        <!-- Recommendations -->
-        <div class="card mb-3">
-            <div class="card-header">
-                <h5 class="mb-0">Dispatch Recommendations</h5>
-            </div>
-            <div class="card-body">
-                {% for rec in recommendations %}
-                {% include "dispatch/partials/queue_suggestion_card.html" %}
-                {% empty %}
-                <p class="text-muted">No recommendations available.</p>
-                {% endfor %}
-            </div>
-        </div>
     </div>
 
-    <!-- Right column: Map + Crew Status -->
+    <!-- Right column: Map -->
     <div class="col-lg-5">
-        <!-- Map -->
         <div class="card mb-3">
             <div class="card-header">
                 <h5 class="mb-0">Dispatch Map</h5>
             </div>
             <div class="card-body p-0">
-                <div id="dispatch-map" style="height: 400px;"></div>
-            </div>
-        </div>
-
-        <!-- Crew Status -->
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Crew Status</h5>
-                <span class="badge bg-success">{{ available_crews }} available</span>
-            </div>
-            <div class="card-body">
-                {% for crew in crews %}
-                {% include "dispatch/partials/crew_card.html" %}
-                {% endfor %}
+                <div id="dispatch-map" style="height: 500px;"></div>
             </div>
         </div>
     </div>
