@@ -18,6 +18,7 @@ urlpatterns = [
     path("htmx/job-queue-detail/<int:pk>/", dashboard.htmx_job_queue_detail),
     path("htmx/crew-detail/<int:pk>/", dashboard.htmx_crew_detail),
     path("htmx/crew-queue/<int:crew_id>/", dispatch_actions.htmx_crew_queue),
+    path("htmx/recommendations-board/", dashboard.htmx_recommendations_board),
 
     # Actions (POST)
     path("action/dispatch/", dispatch_actions.dispatch_crew, name="dispatch_crew"),

@@ -1,93 +1,92 @@
 /* SES Dispatch - Crew Screen Styles */
-/* Light theme with orange accents (matching Shiny) */
+/* Uses design system variables from dispatch.css */
 
 .crew-screen-wrapper {
-    background-color: #fafafa;
-    color: #333;
+    background-color: var(--surface-bg);
+    color: var(--text-primary);
     min-height: 80vh;
     padding: 1rem;
-    border-radius: 8px;
+    border-radius: 10px;
 }
 
 .crew-selector .form-select {
     font-size: 1.1rem;
-    border: 2px solid #E65100;
+    border: 2px solid var(--ses-orange);
+    border-radius: 8px;
+    font-family: var(--font-ui);
 }
-
 .crew-selector .form-label {
-    color: #666;
+    color: var(--text-secondary);
     font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
 }
 
 /* Status banner */
 .crew-status-banner {
     text-align: center;
-    border-radius: 8px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
 }
-.crew-status-banner small {
-    color: rgba(255,255,255,0.9);
-}
-.crew-status-banner h4 {
-    color: white;
-}
+.crew-status-banner small { color: rgba(255,255,255,0.9); }
+.crew-status-banner h4 { color: white; font-weight: 700; }
 
-/* Status banner colors matching Shiny */
-.crew-banner-available { background-color: #2e7d32 !important; }
-.crew-banner-dispatched { background-color: #f57c00 !important; }
-.crew-banner-on_scene { background-color: #d32f2f !important; }
-.crew-banner-returning { background-color: #f57c00 !important; }
-.crew-banner-offline { background-color: #9e9e9e !important; }
+.crew-banner-available { background-color: var(--status-available) !important; }
+.crew-banner-dispatched { background-color: var(--status-dispatched) !important; }
+.crew-banner-on_scene { background-color: var(--status-on-scene) !important; }
+.crew-banner-returning { background-color: var(--status-dispatched) !important; }
+.crew-banner-offline { background-color: var(--status-offline) !important; }
 
-/* Job card on crew screen - light theme */
+/* Job card on crew screen */
 .crew-screen-wrapper .card {
-    background-color: #fff;
-    border: 1px solid #e0e0e0;
-    color: #333;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    background-color: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-md);
 }
-
 .crew-screen-wrapper .card-header {
-    background-color: #fff3e0;
-    border-bottom: 2px solid #E65100;
-    color: #E65100;
+    background-color: var(--ses-orange-bg);
+    border-bottom: 2px solid var(--ses-orange);
+    color: var(--ses-orange);
     font-weight: 600;
 }
 
 .detail-label {
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #999;
-    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    font-weight: 700;
 }
-
 .detail-row {
     padding: 4px 0;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--surface-border);
 }
-
-.next-job-row {
-    border-color: #e0e0e0 !important;
-}
+.next-job-row { border-color: var(--surface-border) !important; }
 
 /* Big action buttons */
 .crew-screen-wrapper .btn-lg {
     font-size: 1.2rem;
     padding: 12px;
     border-radius: 8px;
+    font-weight: 600;
 }
-
 .crew-screen-wrapper .btn-primary {
-    background-color: #E65100;
-    border-color: #E65100;
+    background-color: var(--ses-orange);
+    border-color: var(--ses-orange);
 }
 .crew-screen-wrapper .btn-primary:hover {
     background-color: #bf4500;
     border-color: #bf4500;
 }
 
-/* No active job message */
 .crew-screen-wrapper .text-muted {
-    color: #999 !important;
+    color: var(--text-muted) !important;
+}
+
+.co-attending-text {
+    color: var(--ses-orange);
+    font-weight: bold;
 }

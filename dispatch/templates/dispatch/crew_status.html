@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="row">
-    <!-- Crew table (8 cols) -->
+    <!-- Crew table -->
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header">
@@ -25,21 +25,21 @@
                         </thead>
                         <tbody>
                             {% for crew in crews %}
-                            <tr class="crew-row" style="cursor: pointer;"
+                            <tr class="crew-row cursor-pointer"
                                 hx-get="/htmx/crew-detail/{{ crew.pk }}/"
                                 hx-target="#crew-detail-panel"
                                 hx-swap="innerHTML">
                                 <td><strong>{{ crew.callsign }}</strong></td>
                                 <td>{{ crew.vehicle_type }}</td>
                                 <td>
-                                    <span class="status-text-{{ crew.status }}" style="text-transform: uppercase;">
+                                    <span class="status-text-{{ crew.status }} text-uppercase-status">
                                         {{ crew.get_status_display }}
                                     </span>
                                 </td>
-                                <td>{{ crew.crew_size }}</td>
+                                <td class="font-mono">{{ crew.crew_size }}</td>
                                 <td>
                                     {% if crew.current_job %}
-                                    {{ crew.current_job.sierra_number }}
+                                    <span class="font-mono">{{ crew.current_job.sierra_number }}</span>
                                     {% else %}
                                     <span class="text-muted">-</span>
                                     {% endif %}
@@ -56,15 +56,20 @@
         </div>
     </div>
 
-    <!-- Crew detail panel (4 cols) -->
+    <!-- Crew detail panel -->
     <div class="col-lg-4">
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">Crew Details</h5>
             </div>
             <div class="card-body" id="crew-detail-panel">
-                <div class="text-center text-muted py-4">
-                    <p>Click a crew row to view details</p>
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7Zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216ZM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
+                        </svg>
+                    </div>
+                    <p>Select a crew to view details</p>
                 </div>
             </div>
         </div>
@@ -74,7 +79,6 @@
 
 {% block extra_js %}
 <script>
-    // Highlight selected row
     document.addEventListener('htmx:afterRequest', function(e) {
         if (e.detail.target && e.detail.target.id === 'crew-detail-panel') {
             document.querySelectorAll('#crew-table .crew-row').forEach(function(row) {

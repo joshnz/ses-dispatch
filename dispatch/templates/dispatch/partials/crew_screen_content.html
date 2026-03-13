@@ -42,7 +42,7 @@
     {% if co_crews.count > 1 %}
     <div class="detail-row mb-2">
         <span class="detail-label">Co-attending</span>
-        <span style="color: #E65100; font-weight: bold;">
+        <span class="co-attending-text">
             {% for c in co_crews %}
             {% if c.pk != crew.pk %}
             {{ c.callsign }} ({{ c.vehicle_type }}) - {{ c.status|upper }}
@@ -68,8 +68,8 @@
 
 <div class="d-grid gap-2 mb-3">
     <a href="https://www.google.com/maps/dir/?api=1&destination={{ job.location.y }},{{ job.location.x }}"
-       target="_blank" class="btn btn-primary btn-lg"
-       style="background: #1976d2; border-color: #1976d2;">
+       target="_blank" class="btn btn-lg"
+       style="background: var(--p3-color); border-color: var(--p3-color); color: #fff;">
         Navigate to Job
     </a>
     {% if crew.status == "dispatched" %}

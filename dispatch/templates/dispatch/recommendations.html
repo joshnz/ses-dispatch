@@ -3,141 +3,21 @@
 {% block title %}Recommendations - SES Dispatch{% endblock %}
 
 {% block content %}
-{% if is_surge %}
-<div class="surge-banner mb-3">
-    SURGE MODE ACTIVE &mdash; {{ pending_count }} pending jobs
-</div>
-{% endif %}
-
 <div class="card mb-3">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Dispatch Board</h5>
-        <a href="{% url 'recommendations' %}" class="btn btn-sm btn-outline-secondary">Refresh</a>
+        <button class="btn btn-sm btn-outline-light"
+                hx-get="/htmx/recommendations-board/"
+                hx-target="#rec-board"
+                hx-swap="innerHTML">Refresh</button>
     </div>
 </div>
 
-<div class="row">
-    {% for crew_id, data in crew_data.items %}
-    <div class="col-lg-6 mb-3">
-        <div class="crew-card">
-            <!-- Crew header -->
-            <div class="crew-header crew-header-{{ data.crew.status }} d-flex justify-content-between align-items-center">
-                <div>
-                    <strong>{{ data.crew.callsign }}</strong>
-                    <small class="ms-1">{{ data.crew.vehicle_type }}</small>
-                </div>
-                <div>
-                    {% if data.time_away %}
-                    <span class="badge {% if data.away_mins >= 120 %}bg-danger{% elif data.away_mins >= 60 %}bg-warning text-dark{% else %}bg-light text-dark{% endif %} me-1">
-                        {{ data.time_away }}
-                    </span>
-                    {% endif %}
-                    <span style="text-transform: uppercase; font-size: 0.8rem;">
-                        {{ data.crew.get_status_display }}
-                    </span>
-                </div>
-            </div>
-            <div class="crew-body">
-                <!-- Current job (if dispatched/on_scene) -->
-                {% if data.crew.current_job %}
-                <div class="p-2 mb-2 rounded" style="background: #fff3e0;">
-                    <div class="small">
-                        <strong>Current:</strong>
-                        <span class="badge bg-priority-{{ data.crew.current_job.priority }}">P{{ data.crew.current_job.priority }}</span>
-                        {{ data.crew.current_job.sierra_number }} &mdash;
-                        {{ data.crew.current_job.description|truncatechars:50 }}
-                    </div>
-                    <div class="small text-muted">{{ data.crew.current_job.location_address|truncatechars:50 }}</div>
-                    <button class="btn btn-success btn-sm mt-1 rec-action-btn"
-                            data-action="/action/complete/{{ data.crew.current_job.pk }}/">
-                        Complete
-                    </button>
-                </div>
-                {% endif %}
-
-                <!-- Primary recommendation -->
-                {% for rec in data.primary %}
-                <div class="d-flex align-items-center justify-content-between py-1 border-bottom">
-                    <div class="flex-grow-1">
-                        <span class="badge me-1" style="background: #f57c00; color: #fff; min-width: 70px;">Primary</span>
-                        <span class="badge bg-priority-{{ rec.job.priority }}">P{{ rec.job.priority }}</span>
-                        <strong>{{ rec.job.sierra_number }}</strong>
-                        <span class="text-muted small">{{ rec.job.description|truncatechars:40 }}</span>
-                        <div class="small text-muted">
-                            ETA: {{ rec.travel_mins }}m | Score: {{ rec.dispatch_score }}
-                            | {{ rec.job.location_address|truncatechars:35 }}
-                        </div>
-                    </div>
-                    {% if data.crew.status == "available" %}
-                    <button class="btn btn-warning btn-sm ms-2 rec-dispatch-btn"
-                            data-job-id="{{ rec.job.pk }}" data-crew-id="{{ rec.crew.pk }}">Dispatch</button>
-                    {% else %}
-                    <span class="badge bg-secondary ms-2">Next up</span>
-                    {% endif %}
-                </div>
-                {% endfor %}
-
-                <!-- Alternate recommendation -->
-                {% for rec in data.alternate %}
-                <div class="d-flex align-items-center justify-content-between py-1 border-bottom">
-                    <div class="flex-grow-1">
-                        <span class="badge me-1" style="background: #e0e0e0; color: #666; min-width: 70px;">Alternate</span>
-                        <span class="badge bg-priority-{{ rec.job.priority }}">P{{ rec.job.priority }}</span>
-                        <strong>{{ rec.job.sierra_number }}</strong>
-                        <span class="text-muted small">{{ rec.job.description|truncatechars:40 }}</span>
-                        <div class="small text-muted">
-                            ETA: {{ rec.travel_mins }}m | Score: {{ rec.dispatch_score }}
-                            | {{ rec.job.location_address|truncatechars:35 }}
-                        </div>
-                    </div>
-                    {% if data.crew.status == "available" %}
-                    <button class="btn btn-outline-secondary btn-sm ms-2 rec-dispatch-btn"
-                            data-job-id="{{ rec.job.pk }}" data-crew-id="{{ rec.crew.pk }}">Dispatch</button>
-                    {% endif %}
-                </div>
-                {% endfor %}
-
-                <!-- Queue suggestion (top recommendation only) -->
-                {% with top_queue=data.queue|first %}
-                {% if top_queue %}
-                <div class="d-flex align-items-center justify-content-between py-1 border-bottom">
-                    <div class="flex-grow-1">
-                        <span class="badge me-1" style="background: var(--p3-color); color: #fff; min-width: 70px;">Queue</span>
-                        <span class="badge bg-priority-{{ top_queue.job.priority }}">P{{ top_queue.job.priority }}</span>
-                        <strong>{{ top_queue.job.sierra_number }}</strong>
-                        <span class="text-muted small">{{ top_queue.job.description|truncatechars:40 }}</span>
-                        <div class="small text-muted">
-                            ETA: {{ top_queue.travel_mins }}m | Score: {{ top_queue.dispatch_score }}
-                            | Pos: {{ top_queue.queue_position }}
-                        </div>
-                    </div>
-                    <button class="btn btn-warning btn-sm ms-2 rec-queue-btn"
-                            data-crew-id="{{ top_queue.crew.pk }}" data-job-id="{{ top_queue.job.pk }}">Queue</button>
-                </div>
-                {% endif %}
-                {% endwith %}
-
-                {% if not data.primary and not data.alternate and not data.queue and not data.crew.current_job %}
-                <div class="text-muted small py-2">No recommendations</div>
-                {% endif %}
-
-                <!-- Return to base button -->
-                {% if data.crew.deployed_at %}
-                <div class="mt-2">
-                    <button class="btn btn-info btn-sm w-100 rec-rtb-btn"
-                            data-crew-id="{{ data.crew.pk }}">
-                        Return to Base{% if data.time_away %} ({{ data.time_away }}){% endif %}
-                    </button>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    {% empty %}
-    <div class="col-12">
-        <p class="text-muted">No active crews. All crews are offline.</p>
-    </div>
-    {% endfor %}
+<div id="rec-board"
+     hx-get="/htmx/recommendations-board/"
+     hx-trigger="dispatch-changed"
+     hx-swap="innerHTML">
+    {% include "dispatch/partials/recommendations_board.html" %}
 </div>
 
 <div id="modal-container"></div>
@@ -159,36 +39,65 @@
         });
     }
 
-    // Simple action buttons (complete, return to base)
-    document.querySelectorAll('.rec-action-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var action = this.getAttribute('data-action');
+    function showActionToast(message, type) {
+        var container = document.getElementById('toast-container');
+        if (!container) return;
+        var bgClass = type === 'success' ? 'text-bg-success' : 'text-bg-info';
+        var toast = document.createElement('div');
+        toast.className = 'toast align-items-center ' + bgClass + ' border-0 show';
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML =
+            '<div class="d-flex">' +
+            '<div class="toast-body">' + message + '</div>' +
+            '<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>' +
+            '</div>';
+        container.appendChild(toast);
+        setTimeout(function() {
+            toast.classList.remove('show');
+            setTimeout(function() { toast.remove(); }, 300);
+        }, 4000);
+    }
+
+    function refreshBoard() {
+        htmx.trigger(document.body, 'dispatch-changed');
+    }
+
+    // Delegated event listeners on #rec-board (works after HTMX swaps)
+    document.getElementById('rec-board').addEventListener('click', function(e) {
+        var btn;
+
+        // Complete / simple action buttons
+        btn = e.target.closest('.rec-action-btn');
+        if (btn) {
+            var action = btn.getAttribute('data-action');
             btn.disabled = true;
             btn.textContent = 'Processing...';
             postAction(action).then(function() {
-                window.location.reload();
+                showActionToast('Job completed', 'success');
+                refreshBoard();
             });
-        });
-    });
+            return;
+        }
 
-    // Dispatch buttons (primary/alternate)
-    document.querySelectorAll('.rec-dispatch-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var jobId = this.getAttribute('data-job-id');
-            var crewId = this.getAttribute('data-crew-id');
+        // Dispatch buttons
+        btn = e.target.closest('.rec-dispatch-btn');
+        if (btn) {
+            var jobId = btn.getAttribute('data-job-id');
+            var crewId = btn.getAttribute('data-crew-id');
             btn.disabled = true;
             btn.textContent = 'Dispatching...';
             postAction('/action/dispatch/', 'job_id=' + jobId + '&crew_id=' + crewId + '&confirmed=1')
                 .then(function() {
-                    window.location.reload();
+                    showActionToast('Crew dispatched', 'success');
+                    refreshBoard();
                 });
-        });
-    });
+            return;
+        }
 
-    // Return to base buttons (shows modal if crew has current job)
-    document.querySelectorAll('.rec-rtb-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var rtbCrewId = this.getAttribute('data-crew-id');
+        // Return to base buttons
+        btn = e.target.closest('.rec-rtb-btn');
+        if (btn) {
+            var rtbCrewId = btn.getAttribute('data-crew-id');
             btn.disabled = true;
             btn.textContent = 'Processing...';
             postAction('/action/return-to-base/' + rtbCrewId + '/')
@@ -199,24 +108,27 @@
                         btn.disabled = false;
                         btn.textContent = 'Return to Base';
                     } else {
-                        window.location.reload();
+                        showActionToast('Crew returning to base', 'success');
+                        refreshBoard();
                     }
                 });
-        });
-    });
+            return;
+        }
 
-    // Queue buttons
-    document.querySelectorAll('.rec-queue-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var crewId = this.getAttribute('data-crew-id');
-            var jobId = this.getAttribute('data-job-id');
+        // Queue buttons
+        btn = e.target.closest('.rec-queue-btn');
+        if (btn) {
+            var qCrewId = btn.getAttribute('data-crew-id');
+            var qJobId = btn.getAttribute('data-job-id');
             btn.disabled = true;
             btn.textContent = 'Queuing...';
-            postAction('/action/queue/' + crewId + '/add/', 'job_id=' + jobId)
+            postAction('/action/queue/' + qCrewId + '/add/', 'job_id=' + qJobId)
                 .then(function() {
-                    window.location.reload();
+                    showActionToast('Job queued', 'success');
+                    refreshBoard();
                 });
-        });
+            return;
+        }
     });
 })();
 </script>

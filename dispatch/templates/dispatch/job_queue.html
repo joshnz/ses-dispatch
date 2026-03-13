@@ -3,41 +3,31 @@
 {% block title %}Job Queue - SES Dispatch{% endblock %}
 
 {% block content %}
-<div class="row">
-    <!-- Sidebar filters -->
-    <div class="col-lg-2">
-        <div class="card mb-3">
-            <div class="card-header">
-                <h6 class="mb-0">Filters</h6>
-            </div>
-            <div class="card-body">
-                <form method="get">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Priority</label>
-                        <select name="priority" class="form-select form-select-sm" onchange="this.form.submit()">
-                            <option value="">All</option>
-                            <option value="1" {% if priority_filter == "1" %}selected{% endif %}>P1 - Emergency</option>
-                            <option value="2" {% if priority_filter == "2" %}selected{% endif %}>P2 - Urgent</option>
-                            <option value="3" {% if priority_filter == "3" %}selected{% endif %}>P3 - Routine</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Status</label>
-                        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                            <option value="">All</option>
-                            <option value="pending" {% if status_filter == "pending" %}selected{% endif %}>Pending</option>
-                            <option value="assigned" {% if status_filter == "assigned" %}selected{% endif %}>Assigned</option>
-                            <option value="en_route" {% if status_filter == "en_route" %}selected{% endif %}>En Route</option>
-                            <option value="on_scene" {% if status_filter == "on_scene" %}selected{% endif %}>On Scene</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+<!-- Horizontal filter bar -->
+<form method="get" class="filter-bar">
+    <label>Priority</label>
+    <select name="priority" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="">All</option>
+        <option value="1" {% if priority_filter == "1" %}selected{% endif %}>P1 - Emergency</option>
+        <option value="2" {% if priority_filter == "2" %}selected{% endif %}>P2 - Urgent</option>
+        <option value="3" {% if priority_filter == "3" %}selected{% endif %}>P3 - Routine</option>
+    </select>
+    <label>Status</label>
+    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="">All</option>
+        <option value="pending" {% if status_filter == "pending" %}selected{% endif %}>Pending</option>
+        <option value="assigned" {% if status_filter == "assigned" %}selected{% endif %}>Assigned</option>
+        <option value="en_route" {% if status_filter == "en_route" %}selected{% endif %}>En Route</option>
+        <option value="on_scene" {% if status_filter == "on_scene" %}selected{% endif %}>On Scene</option>
+    </select>
+    {% if priority_filter or status_filter %}
+    <a href="{% url 'job_queue' %}" class="btn btn-sm btn-outline-secondary">Clear</a>
+    {% endif %}
+</form>
 
+<div class="row">
     <!-- Job table -->
-    <div class="col-lg-6">
+    <div class="col-lg-7">
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">Job Queue</h5>
@@ -59,16 +49,16 @@
                         </thead>
                         <tbody>
                             {% for job in jobs %}
-                            <tr class="job-row" style="cursor: pointer;"
+                            <tr class="job-row cursor-pointer"
                                 hx-get="/htmx/job-queue-detail/{{ job.pk }}/"
                                 hx-target="#job-detail-panel"
                                 hx-swap="innerHTML">
-                                <td><strong>{{ job.sierra_number }}</strong></td>
+                                <td><strong class="font-mono">{{ job.sierra_number }}</strong></td>
                                 <td><span class="badge bg-priority-{{ job.priority }}">P{{ job.priority }}</span></td>
                                 <td>{{ job.location_address|truncatechars:35 }}</td>
-                                <td>{{ job.age_minutes }}m</td>
+                                <td class="font-mono">{{ job.age_minutes }}m</td>
                                 <td>
-                                    <span class="status-text-{{ job.status }}" style="text-transform: uppercase;">
+                                    <span class="status-text-{{ job.status }} text-uppercase-status">
                                         {{ job.get_status_display }}
                                     </span>
                                 </td>
@@ -83,7 +73,7 @@
                                 </td>
                                 <td>
                                     {% if job.rec_score %}
-                                    <small>{{ job.rec_score }}</small>
+                                    <small class="font-mono">{{ job.rec_score }}</small>
                                     {% else %}
                                     <small class="text-muted">-</small>
                                     {% endif %}
@@ -108,14 +98,20 @@
     </div>
 
     <!-- Job detail panel -->
-    <div class="col-lg-4">
+    <div class="col-lg-5">
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">Job Details</h5>
             </div>
             <div class="card-body" id="job-detail-panel">
-                <div class="text-center text-muted py-4">
-                    <p>Click a job row to view details</p>
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                        </svg>
+                    </div>
+                    <p>Select a job to view details</p>
                 </div>
             </div>
         </div>

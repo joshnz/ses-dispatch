@@ -105,7 +105,49 @@ def recommendations(request):
             "queue": [r for r in crew_recs if r.get("rec_type") == "queue"],
         }
 
-    return render(request, "dispatch/recommendations.html", {
+    context = {
+        "crew_data": crew_data,
+        "is_surge": is_surge,
+        "pending_count": pending_count,
+    }
+    return render(request, "dispatch/recommendations.html", context)
+
+
+@login_required
+def htmx_recommendations_board(request):
+    from django.utils import timezone as tz
+    from collections import OrderedDict
+
+    recs = get_crew_assignments(recommend_dispatch())
+    is_surge = any(r.get("is_surge") for r in recs)
+    pending_count = Job.objects.filter(status="pending").count()
+
+    crews = Crew.objects.exclude(status="offline")
+    crew_data = OrderedDict()
+    for crew in crews:
+        time_away = None
+        if crew.deployed_at:
+            delta = tz.now() - crew.deployed_at
+            total_mins = int(delta.total_seconds() / 60)
+            if total_mins >= 60:
+                time_away = f"{total_mins // 60}h {total_mins % 60:02d}m"
+            else:
+                time_away = f"{total_mins}m"
+            away_mins = total_mins
+        else:
+            away_mins = 0
+
+        crew_recs = [r for r in recs if r["crew"].id == crew.id]
+        crew_data[crew.id] = {
+            "crew": crew,
+            "time_away": time_away,
+            "away_mins": away_mins,
+            "primary": [r for r in crew_recs if r.get("rec_type") == "primary"],
+            "alternate": [r for r in crew_recs if r.get("rec_type") == "alternate"],
+            "queue": [r for r in crew_recs if r.get("rec_type") == "queue"],
+        }
+
+    return render(request, "dispatch/partials/recommendations_board.html", {
         "crew_data": crew_data,
         "is_surge": is_surge,
         "pending_count": pending_count,

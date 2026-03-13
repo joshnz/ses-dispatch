@@ -1,0 +1,132 @@
+{% if is_surge %}
+<div class="surge-banner mb-3">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+    </svg>
+    SURGE MODE ACTIVE &mdash; {{ pending_count }} pending jobs
+</div>
+{% endif %}
+
+<div class="row">
+    {% for crew_id, data in crew_data.items %}
+    <div class="col-lg-6 mb-3">
+        <div class="crew-card" id="rec-crew-{{ data.crew.pk }}">
+            <!-- Crew header -->
+            <div class="crew-header crew-header-{{ data.crew.status }} d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>{{ data.crew.callsign }}</strong>
+                    <small class="ms-1">{{ data.crew.vehicle_type }}</small>
+                </div>
+                <div>
+                    {% if data.time_away %}
+                    <span class="badge {% if data.away_mins >= 120 %}bg-danger{% elif data.away_mins >= 60 %}bg-warning text-dark{% else %}bg-light text-dark{% endif %} me-1">
+                        {{ data.time_away }}
+                    </span>
+                    {% endif %}
+                    <span class="text-uppercase-status">
+                        {{ data.crew.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="crew-body">
+                <!-- Current job -->
+                {% if data.crew.current_job %}
+                <div class="p-2 mb-2 rounded bg-ses-light">
+                    <div class="small">
+                        <strong>Current:</strong>
+                        <span class="badge bg-priority-{{ data.crew.current_job.priority }}">P{{ data.crew.current_job.priority }}</span>
+                        <span class="font-mono">{{ data.crew.current_job.sierra_number }}</span> &mdash;
+                        {{ data.crew.current_job.description|truncatechars:50 }}
+                    </div>
+                    <div class="small text-muted">{{ data.crew.current_job.location_address|truncatechars:50 }}</div>
+                    <button class="btn btn-success btn-sm mt-1 rec-action-btn"
+                            data-action="/action/complete/{{ data.crew.current_job.pk }}/">
+                        Complete
+                    </button>
+                </div>
+                {% endif %}
+
+                <!-- Primary recommendation -->
+                {% for rec in data.primary %}
+                <div class="d-flex align-items-center justify-content-between py-1 border-bottom">
+                    <div class="flex-grow-1">
+                        <span class="rec-badge rec-badge-primary me-1">Primary</span>
+                        <span class="badge bg-priority-{{ rec.job.priority }}">P{{ rec.job.priority }}</span>
+                        <strong class="font-mono">{{ rec.job.sierra_number }}</strong>
+                        <span class="text-muted small">{{ rec.job.description|truncatechars:40 }}</span>
+                        <div class="small text-muted">
+                            ETA: {{ rec.travel_mins }}m | Score: {{ rec.dispatch_score }}
+                            | {{ rec.job.location_address|truncatechars:35 }}
+                        </div>
+                    </div>
+                    {% if data.crew.status == "available" %}
+                    <button class="btn btn-warning btn-sm ms-2 rec-dispatch-btn"
+                            data-job-id="{{ rec.job.pk }}" data-crew-id="{{ rec.crew.pk }}">Dispatch</button>
+                    {% else %}
+                    <span class="badge bg-secondary ms-2">Next up</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <!-- Alternate recommendation -->
+                {% for rec in data.alternate %}
+                <div class="d-flex align-items-center justify-content-between py-1 border-bottom">
+                    <div class="flex-grow-1">
+                        <span class="rec-badge rec-badge-alternate me-1">Alternate</span>
+                        <span class="badge bg-priority-{{ rec.job.priority }}">P{{ rec.job.priority }}</span>
+                        <strong class="font-mono">{{ rec.job.sierra_number }}</strong>
+                        <span class="text-muted small">{{ rec.job.description|truncatechars:40 }}</span>
+                        <div class="small text-muted">
+                            ETA: {{ rec.travel_mins }}m | Score: {{ rec.dispatch_score }}
+                            | {{ rec.job.location_address|truncatechars:35 }}
+                        </div>
+                    </div>
+                    {% if data.crew.status == "available" %}
+                    <button class="btn btn-outline-secondary btn-sm ms-2 rec-dispatch-btn"
+                            data-job-id="{{ rec.job.pk }}" data-crew-id="{{ rec.crew.pk }}">Dispatch</button>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <!-- Queue suggestion -->
+                {% with top_queue=data.queue|first %}
+                {% if top_queue %}
+                <div class="d-flex align-items-center justify-content-between py-1 border-bottom">
+                    <div class="flex-grow-1">
+                        <span class="rec-badge rec-badge-queue me-1">Queue</span>
+                        <span class="badge bg-priority-{{ top_queue.job.priority }}">P{{ top_queue.job.priority }}</span>
+                        <strong class="font-mono">{{ top_queue.job.sierra_number }}</strong>
+                        <span class="text-muted small">{{ top_queue.job.description|truncatechars:40 }}</span>
+                        <div class="small text-muted">
+                            ETA: {{ top_queue.travel_mins }}m | Score: {{ top_queue.dispatch_score }}
+                            | Pos: {{ top_queue.queue_position }}
+                        </div>
+                    </div>
+                    <button class="btn btn-warning btn-sm ms-2 rec-queue-btn"
+                            data-crew-id="{{ top_queue.crew.pk }}" data-job-id="{{ top_queue.job.pk }}">Queue</button>
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                {% if not data.primary and not data.alternate and not data.queue and not data.crew.current_job %}
+                <div class="text-muted small py-2">No recommendations</div>
+                {% endif %}
+
+                <!-- Return to base button -->
+                {% if data.crew.deployed_at %}
+                <div class="mt-2">
+                    <button class="btn btn-info btn-sm w-100 rec-rtb-btn"
+                            data-crew-id="{{ data.crew.pk }}">
+                        Return to Base{% if data.time_away %} ({{ data.time_away }}){% endif %}
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p class="text-muted">No active crews. All crews are offline.</p>
+    </div>
+    {% endfor %}
+</div>

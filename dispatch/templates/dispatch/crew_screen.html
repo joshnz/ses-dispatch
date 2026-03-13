@@ -11,11 +11,14 @@
 
 {% block content %}
 <div class="crew-screen-wrapper">
-    <!-- Crew selector -->
+    <!-- Crew selector - uses HTMX for instant switching -->
     <div class="crew-selector mb-3">
         <label for="crew-select" class="form-label">Select Crew:</label>
         <select id="crew-select" class="form-select"
-                onchange="window.location.href='?crew=' + this.value">
+                hx-get="" hx-trigger="change"
+                hx-target="#crew-content" hx-swap="innerHTML"
+                hx-vals="js:{}" hx-include=""
+                onchange="if(this.value){htmx.ajax('GET','/htmx/crew-screen-content/'+this.value+'/',{target:'#crew-content',swap:'innerHTML'});history.replaceState(null,'','?crew='+this.value);}else{document.getElementById('crew-content').innerHTML='<div class=\'empty-state mt-5\'><div class=\'empty-state-icon\'><svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;48&quot; height=&quot;48&quot; fill=&quot;currentColor&quot; viewBox=&quot;0 0 16 16&quot;><path d=&quot;M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z&quot;/></svg></div><h5>Select your crew above to begin</h5></div>';}">
             <option value="">-- Select crew --</option>
             {% for c in crews %}
             <option value="{{ c.pk }}" {% if crew and crew.pk == c.pk %}selected{% endif %}>
@@ -25,17 +28,24 @@
         </select>
     </div>
 
-    {% if crew %}
     <div id="crew-content"
+         {% if crew %}
          hx-get="/htmx/crew-screen-content/{{ crew.pk }}/"
          hx-trigger="dispatch-changed"
-         hx-swap="innerHTML">
+         hx-swap="innerHTML"
+         {% endif %}>
+        {% if crew %}
         {% include "dispatch/partials/crew_screen_content.html" %}
+        {% else %}
+        <div class="empty-state mt-5">
+            <div class="empty-state-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                </svg>
+            </div>
+            <h5>Select your crew above to begin</h5>
+        </div>
+        {% endif %}
     </div>
-    {% else %}
-    <div class="text-center text-muted mt-5">
-        <h4>Select your crew above to begin</h4>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
