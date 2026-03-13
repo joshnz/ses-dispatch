@@ -11,7 +11,7 @@
     <div class="small mb-1"><span class="text-muted">Address:</span> {{ job.location_address }}</div>
     <div class="small mb-1"><span class="text-muted">Description:</span> {{ job.description }}</div>
     <div class="small mb-1"><span class="text-muted">Caller:</span> {{ job.caller_name }} &mdash; {{ job.caller_phone }}</div>
-    <div class="small mb-1"><span class="text-muted">Age:</span> {{ job.age_minutes }} minutes</div>
+    <div class="small mb-1"><span class="text-muted">Age:</span> {{ job.age_display }}</div>
     {% if job.other_agencies %}
     <div class="small mb-1"><span class="text-muted">Agencies:</span> {{ job.other_agencies|join:", " }}</div>
     {% endif %}

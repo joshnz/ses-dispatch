@@ -38,7 +38,7 @@
     </div>
     <div class="small mb-1"><span class="text-muted">Address:</span> {{ crew.current_job.location_address }}</div>
     <div class="small mb-1"><span class="text-muted">Description:</span> {{ crew.current_job.description|truncatechars:100 }}</div>
-    <div class="small mb-2"><span class="text-muted">Age:</span> {{ crew.current_job.age_minutes }} minutes</div>
+    <div class="small mb-2"><span class="text-muted">Age:</span> {{ crew.current_job.age_display }}</div>
 
     {% if photos %}
     <div class="mb-2">

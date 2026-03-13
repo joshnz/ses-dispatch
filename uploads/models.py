@@ -24,13 +24,21 @@ class UploadToken(models.Model):
         return f"Token for {self.job.sierra_number} ({self.upload_count}/{self.max_uploads})"
 
 
+def photo_upload_path(instance, filename):
+    return f"job_photos/{instance.job.sierra_number}/{filename}"
+
+
+def thumb_upload_path(instance, filename):
+    return f"job_photos/{instance.job.sierra_number}/thumbs/{filename}"
+
+
 class Photo(models.Model):
     job = models.ForeignKey(
         "dispatch.Job", on_delete=models.CASCADE, related_name="photos"
     )
     upload_token = models.ForeignKey(UploadToken, on_delete=models.SET_NULL, null=True)
-    image = models.ImageField(upload_to="job_photos/%Y/%m/")
-    thumbnail = models.ImageField(upload_to="job_photos/%Y/%m/thumbs/", blank=True)
+    image = models.ImageField(upload_to=photo_upload_path)
+    thumbnail = models.ImageField(upload_to=thumb_upload_path, blank=True)
     description = models.TextField(blank=True)
     uploaded_by_name = models.CharField(max_length=100, blank=True)
     geo_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)

@@ -12,7 +12,7 @@
                         <tr><th>Description</th><td>{{ job.description }}</td></tr>
                         <tr><th>Caller</th><td>{{ job.caller_name }} &mdash; {{ job.caller_phone }}</td></tr>
                         <tr><th>Status</th><td><span class="badge badge-status-{{ job.status }}">{{ job.get_status_display }}</span></td></tr>
-                        <tr><th>Age</th><td>{{ job.age_minutes }} minutes</td></tr>
+                        <tr><th>Age</th><td>{{ job.age_display }}</td></tr>
                         {% if job.other_agencies %}
                         <tr><th>Other Agencies</th><td>{{ job.other_agencies|join:", " }}</td></tr>
                         {% endif %}

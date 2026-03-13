@@ -35,9 +35,6 @@ class Command(BaseCommand):
             self.stderr.write(f"Source directory not found: {source_dir}")
             return
 
-        dest_dir = os.path.join(media_root, "job_photos", "demo")
-        os.makedirs(dest_dir, exist_ok=True)
-
         count = 0
         for entry in DEMO_PHOTOS:
             try:
@@ -51,18 +48,24 @@ class Command(BaseCommand):
                 self.stderr.write(f"File not found: {src}")
                 continue
 
+            # Use sierra number as directory name
+            dest_dir = os.path.join(media_root, "job_photos", entry["sierra"])
+            os.makedirs(dest_dir, exist_ok=True)
+            thumbs_dir = os.path.join(dest_dir, "thumbs")
+            os.makedirs(thumbs_dir, exist_ok=True)
+
             # Copy to media directory
             dest_file = os.path.join(dest_dir, entry["file"])
             shutil.copy2(src, dest_file)
 
             # Also copy as thumbnail (same image for demo)
             thumb_name = f"thumb_{entry['file']}"
-            thumb_file = os.path.join(dest_dir, thumb_name)
+            thumb_file = os.path.join(thumbs_dir, thumb_name)
             shutil.copy2(src, thumb_file)
 
             # Relative paths from MEDIA_ROOT
-            rel_image = os.path.join("job_photos", "demo", entry["file"])
-            rel_thumb = os.path.join("job_photos", "demo", thumb_name)
+            rel_image = os.path.join("job_photos", entry["sierra"], entry["file"])
+            rel_thumb = os.path.join("job_photos", entry["sierra"], "thumbs", thumb_name)
 
             # Create or update Photo record
             photo, created = Photo.objects.update_or_create(

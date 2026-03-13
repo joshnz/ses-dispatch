@@ -56,7 +56,7 @@
                                 <td><strong class="font-mono">{{ job.sierra_number }}</strong></td>
                                 <td><span class="badge bg-priority-{{ job.priority }}">P{{ job.priority }}</span></td>
                                 <td>{{ job.location_address|truncatechars:35 }}</td>
-                                <td class="font-mono">{{ job.age_minutes }}m</td>
+                                <td class="font-mono">{{ job.age_display }}</td>
                                 <td>
                                     <span class="status-text-{{ job.status }} text-uppercase-status">
                                         {{ job.get_status_display }}

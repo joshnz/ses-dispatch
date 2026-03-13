@@ -56,6 +56,15 @@ class Job(models.Model):
         delta = timezone.now() - self.created_at
         return int(delta.total_seconds() / 60)
 
+    @property
+    def age_display(self):
+        mins = self.age_minutes
+        if mins < 60:
+            return f"{mins} minutes"
+        hours = mins // 60
+        remainder = mins % 60
+        return f"{hours} hours and {remainder} minutes"
+
 
 class Crew(models.Model):
     class Status(models.TextChoices):

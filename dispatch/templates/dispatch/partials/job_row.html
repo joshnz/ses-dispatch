@@ -16,7 +16,7 @@
         <span class="badge badge-status-dispatched">+{{ job.assigned_crews.count|add:"-1" }}</span>
         {% endif %}
     </td>
-    <td>{{ job.age_minutes }}m</td>
+    <td>{{ job.age_display }}</td>
     <td class="text-center">
         {% if job.photos.count > 0 %}
         <span title="{{ job.photos.count }} photo{{ job.photos.count|pluralize }}" style="color: var(--ses-orange);">
